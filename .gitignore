@@ -1,0 +1,13 @@
+.idea
+
+# Linux AppImage
+/app/AppDir
+/app/appimage-build
+
+.refena_inspector/
+
+/secrets
+localsend_autocopy.log
+
+# FVM Version Cache
+.fvm/
