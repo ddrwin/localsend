@@ -79,15 +79,15 @@ enum FilePickerOption {
       // On android, the file app is most powerful.
       // It actually also allows to pick media files.
       return [
-        FilePickerOption.file,
+        FilePickerOption.text,
         FilePickerOption.media,
         FilePickerOption.clipboard,
-        FilePickerOption.text,
+        FilePickerOption.file,
         FilePickerOption.folder,
         FilePickerOption.app,
       ];
     } else {
-      // Desktop — 保持不变
+      // Desktop
       return [
         FilePickerOption.file,
         FilePickerOption.folder,
