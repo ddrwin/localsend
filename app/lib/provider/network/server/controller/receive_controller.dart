@@ -350,9 +350,9 @@ class ReceiveController {
       // This usually happens for message transfers
       closeSession();
       if (autoAcceptMessage) {
-        _debugFileLog('204 response: delaying 800ms before responding');
+        _debugFileLog('204 response: delaying 200ms before responding');
         // Give Android side time to settle its UI state before responding
-        await Future.delayed(const Duration(milliseconds: 800));
+        await Future.delayed(const Duration(milliseconds: 200));
       }
       _debugFileLog('204 response: sending response');
       return await request.respondJson(204);
