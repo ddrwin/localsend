@@ -2,6 +2,14 @@
 
 > 最后更新：2026-05-08
 >
+> ## ⚡ 核心规则（只需记这一条）
+>
+> **每次发布时，执行 [`docs/RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md)，逐条打勾。**
+>
+> 所有步骤（归档、写 log、案例日志、GitHub、同步）全部在 checklist 里。做完它就不会漏。
+>
+> ---
+>
 > 本文件三个位置同步存放：
 > 1. **工作目录/公共文档** `E:\CodeBase\localsend\docs\WORKFLOW_RULES.md`
 > 2. **记忆目录** `C:\Users\Administrator\.claude\projects\D----\memory\`
@@ -56,20 +64,9 @@ LocalSend_20260507_201200_PC便携版+AndroidAPK_自动复制完成
 
 ### 每次新增构建产物的步骤
 
-1. 在 `build_outputs\LocalSend\` 下创建新目录，按命名规范命名（含平台+类型）
-2. 将安装包/便携版/APK 放入该目录
-3. 在该目录内创建 `README.md`，说明：
-   - 版本号
-   - 构建时间
-   - 构建环境（VS 版本 / 生成器类型）
-   - Flutter 引擎 MD5
-   - 修复了什么 / 特点
-4. 更新 `BUILD_LOG.md`，追加一条记录
-5. 如果推了 GitHub，更新 `GITHUB_LOG.md`
-6. 将 BUILD_LOG.md 和 GITHUB_LOG.md 镜像到 D 盘项目备份目录
-7. **必须更新案例日志**（`docs/case_logs/`），记录本次构建的坑点、问题、决策
+详见 [`docs/RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md)，按章节逐条执行即可。不再在此重复列出。
 
-> ⚠️ 案例日志与构建产物同时生成，不可跳过。即使没有特别的问题，也要记录"本次无异常"及构建版本信息。
+> **改名同步规则：** 如果重命名了物理目录，必须在 BUILD_LOG.md 的「目录结构」和对应章节标题中同步更新，否则日志与目录不匹配。
 
 ---
 
