@@ -61,6 +61,7 @@ LocalSend_<YYYYMMDD_HHMMSS>_<简短描述>
 
 - 源代码（.dart、.yaml、.bat、.md 等）推送到 GitHub
 - 构建产物（.exe、.apk、便携版目录）不上传 GitHub，只存本地 `build_outputs\`
+- **每次有源码变更时，必须 push 到 GitHub**（除非明确告知无需推送）
 - 每次推送后更新 `GITHUB_LOG.md`
 - 如需在 GitHub 提供下载，创建 GitHub Release 并上传附件
 
