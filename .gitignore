@@ -20,3 +20,6 @@ localsend_autocopy.log
 
 # Local copy of rhttp for dependency override (pub cache workaround)
 /local_packages/
+
+# Build output (installer, temp files)
+/installer/
