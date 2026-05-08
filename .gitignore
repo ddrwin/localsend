@@ -14,3 +14,9 @@ localsend_autocopy.log
 
 # FVM Version Cache
 .fvm/
+
+# Manually injected native libs (cargokit workaround)
+/app/android/app/src/main/jniLibs/
+
+# Local copy of rhttp for dependency override (pub cache workaround)
+/local_packages/

@@ -174,6 +174,53 @@ rm -f bin/cache/flutter_tools.snapshot bin/cache/flutter_tools.stamp
 
 ---
 
+## 八、编码问题 — 终端中文乱码
+
+Flutter 构建脚本（.bat）在 bash/Cygwin 环境中执行时，cmd.exe 输出的中文字符会变成乱码（mojibake）。
+
+**根因：** bash 使用 UTF-8，cmd.exe 使用系统 ANSI 代码页（中文 Windows 为 CP936/GBK）。
+
+**修复：** 所有 .bat 文件首行添加 `chcp 65001 > nul`，将控制台切换到 UTF-8 代码页。
+
+已在以下文件添加：
+- `build_windows.bat`
+- `build_android.bat`
+
+---
+
+## 九、Claude 语言要求
+
+Claude 在项目中的所有输出必须使用 **中文**：
+- 思考过程、状态更新、问题诊断用中文
+- 代码注释、提交说明用中文
+- 构建产物 README.md 用中文
+
+**例外：** commit message 第一行保留英文类型前缀（feat:/fix:/docs:/chore:），这是 Git 惯例，不变。
+
+---
+
+## 十、已知 Android 构建坑点
+
+### rhttp/cargokit pub cache 问题
+
+**现象：** `flutter build apk` 构建的 APK 缺少 `librhttp.so`（3.8MB），APK 仅 15MB 应为 18MB+。
+
+**根因：** `rhttp-0.10.0` 位于 `Pub\Cache\hosted\pub.dev\` 中。cargokit 的 `run_build_tool.cmd` 需要在临时目录执行 `dart pub get`，但 `pub get` 不允许在 pub cache 内操作 → cargokit 无法编译 Rust 代码 → AAR 中没有 .so → APK 中没有 .so。
+
+**修复（临时）：**
+```bash
+# 从可用的旧 APK 提取 librhttp.so 到 jniLibs
+unzip -o "旧APK.apk" "lib/arm64-v8a/librhttp.so" -d "android/app/src/main/jniLibs/"
+unzip -o "旧APK.apk" "lib/armeabi-v7a/librhttp.so" -d "android/app/src/main/jniLibs/"
+```
+
+**修复（永久）：**
+1. rhttp 已复制到 `local_packages/rhttp/`（脱离 pub cache）
+2. pubspec.yaml 使用 `dependency_overrides` 指向本地路径
+3. 但仍需安装 cargo-ndk（当前 rustc 1.84.1 不支持）才能完整编译
+
+---
+
 ## 七、自动复制改造要求
 
 - PC 端：发送文件时不弹窗（直接走确认流程）

@@ -57,6 +57,15 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
               onPressed: () => context.pop(),
               child: Text(t.general.cancel),
             ),
+            const Spacer(),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              onPressed: () => _pop(_textController.text, sendToAll: true),
+              child: Text(t.dialogs.messageInput.sendToAll),
+            ),
             const SizedBox(width: 8),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -65,11 +74,6 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
               ),
               onPressed: () => _pop(_textController.text),
               child: Text(t.general.confirm),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () => _pop(_textController.text, sendToAll: true),
-              child: Text(t.dialogs.messageInput.sendToAll),
             ),
           ],
         ),
