@@ -1096,6 +1096,10 @@ class _TranslationsReceiveHistoryPageEntryActionsZhCn extends TranslationsReceiv
 
   // Translations
   @override
+  String get paste => '粘贴内容';
+  @override
+  String get viewDetails => '详细信息';
+  @override
   String get open => '打开文件';
   @override
   String get showInFolder => '在文件管理器中显示';

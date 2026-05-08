@@ -144,7 +144,7 @@ class ReceiveHistoryPage extends StatelessWidget {
                             await Clipboard.setData(ClipboardData(text: entry.fileName));
                             final pasted = await simulatePaste();
                             if (!pasted && context.mounted) {
-                              context.showSnackBar(SnackBar(content: Text(t.general.copiedToClipboard)));
+                              context.showSnackBar(t.general.copiedToClipboard);
                             }
                             return;
                           }
@@ -190,7 +190,7 @@ class ReceiveHistoryPage extends StatelessWidget {
                               await Clipboard.setData(ClipboardData(text: entry.fileName));
                               final pasted = await simulatePaste();
                               if (!pasted && context.mounted) {
-                                context.showSnackBar(SnackBar(content: Text(t.general.copiedToClipboard)));
+                                context.showSnackBar(t.general.copiedToClipboard);
                               }
                               break;
                             case _EntryOption.viewDetails:

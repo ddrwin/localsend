@@ -745,6 +745,8 @@ class TranslationsReceiveHistoryPageEntryActionsEn {
   final Translations _root; // ignore: unused_field
 
   // Translations
+  String get paste => 'Paste content';
+  String get viewDetails => 'View details';
   String get open => 'Open file';
   String get showInFolder => 'Show in folder';
   String get info => 'Information';
