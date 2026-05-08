@@ -1,0 +1,158 @@
+# LocalSend 项目协作规则
+
+> 最后更新：2026-05-08
+>
+> 本文件三个位置同步存放：
+> 1. **工作目录/公共文档** `E:\CodeBase\localsend\docs\WORKFLOW_RULES.md`
+> 2. **记忆目录** `C:\Users\Administrator\.claude\projects\D----\memory\`
+> 3. **项目备份** `D:\同步文件夹\软件\3 - AI 生产力\5. 项目Projects\LocalSend v1.17.0 自动复制改造\`
+
+---
+
+## 一、构建产物归档规则
+
+### 目录结构
+
+```
+E:\CodeBase\
+├── build_outputs\              ← 所有构建产物根目录
+│   ├── BUILD_LOG.md            ← 构建日志（每个新目录追加一条）
+│   ├── GITHUB_LOG.md           ← GitHub 提交记录
+│   └── LocalSend\              ← LocalSend 项目构建产物
+│       ├── LocalSend_20260507_201200_自动复制完成/
+│       ├── LocalSend_20260508_085100_VS2022便携版/
+│       └── ...
+└── localsend\                  ← 项目源代码目录（git 仓库）
+    ├── app/
+    ├── docs/                   ← 公共文档
+    │   ├── BUILD_SYSTEM.md     ← 编译系统说明
+│   │   ├── WORKFLOW_RULES.md  ← 本文件
+│   │   └── patches/            ← Flutter SDK 补丁
+    └── ...
+```
+
+### 目录命名规范
+
+```
+LocalSend_<YYYYMMDD_HHMMSS>_<简短描述>
+```
+
+- 时间戳在前，按字母排序即按时间排序
+- 描述使用中文，简短一句话概括本次构建特点
+
+### 每次新增构建产物的步骤
+
+1. 在 `build_outputs\LocalSend\` 下创建新目录，按命名规范命名
+2. 将安装包/便携版/APK 放入该目录
+3. 在该目录内创建 `README.md`，说明：
+   - 版本号
+   - 构建时间
+   - 构建环境（VS 版本 / 生成器类型）
+   - Flutter 引擎 MD5
+   - 修复了什么 / 特点
+4. 更新 `BUILD_LOG.md`，追加一条记录
+5. 如果推了 GitHub，更新 `GITHUB_LOG.md`
+6. 将 BUILD_LOG.md 和 GITHUB_LOG.md 镜像到 D 盘项目备份目录
+
+---
+
+## 二、GitHub 管理规则
+
+- 源代码（.dart、.yaml、.bat、.md 等）推送到 GitHub
+- 构建产物（.exe、.apk、便携版目录）不上传 GitHub，只存本地 `build_outputs\`
+- 每次推送后更新 `GITHUB_LOG.md`
+- 如需在 GitHub 提供下载，创建 GitHub Release 并上传附件
+
+### 提交信息规范
+
+commit message 第一行用英文简写类型：
+```
+feat: ...    ← 新功能
+fix: ...     ← 修 bug
+docs: ...    ← 文档
+chore: ...   ← 杂项（版本号、构建配置等）
+```
+
+---
+
+## 三、文档同步规则
+
+每次更新后，三个位置都要同步：
+
+| 位置 | 用途 | 谁读 |
+|------|------|------|
+| 记忆目录 `memory/` | 会话间持久化，下次启动自动加载 | Claude |
+| 公共文档 `docs/` | 工作目录，可追溯版本历史 | 用户 + Claude |
+| 项目备份 `D:\...\项目Projects\` | 用户日常查看和复盘 | 用户 |
+
+---
+
+## 四、知识保存规则
+
+重要决策、坑点记录、工作流变更必须双份存档：
+1. Claude 记忆目录
+2. 工程案例日志目录 `D:\同步文件夹\软件\3 - AI 生产力\0. 工程哲学\案例日志\`
+
+### 案例日志文件命名
+
+```
+project_log_<YYYY-MM-DD>.<序号>.md
+```
+
+### 案例日志内容要求
+
+- 时间戳
+- 遇到的问题和根因
+- 尝试过的方案和结论
+- 最终修复方式
+- 工作流中遇到的障碍
+- 架构关系图（如有必要）
+
+---
+
+## 五、构建环境现状
+
+| 组件 | 版本 | 路径 |
+|------|------|------|
+| Flutter | 3.24.5 | `C:\flutter\flutter\` |
+| MSVC | 2026 BuildTools (cl.exe 19.50) | `C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\` |
+| CMake | 3.31.6（独立版） | `C:\Program Files\CMake\cmake-3.31.6-windows-x86_64\bin\cmake.exe` |
+| Ninja | VS 捆绑版 | `C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\` |
+| 生成器 | Ninja（单配置） | 通过 `build_windows.bat` 调用 |
+
+### 已知坑点
+
+**`$<CONFIG>` 在 Ninja 下为空字符串**
+
+- CMakeLists.txt:100 用 `$<CONFIG>` 确定构建模式
+- Ninja 单配置生成器下求值为空 → `tool_backend.bat` 收到空参数 → 组装 debug 引擎（45MB）
+- 修复：在 `_runCmakeGeneration` 中对 Ninja 添加 `-DCMAKE_BUILD_TYPE=Release`
+- 验证：检查 `flutter_windows.dll` 大小应为 18MB（release）
+- 补丁：`docs/patches/flutter_build_windows_ninja_cmake_type.patch`
+
+**Flutter SDK 修改后需清缓存**
+
+修改 `C:\flutter\flutter\packages\flutter_tools\lib\src\windows\` 下的 .dart 文件后：
+```bash
+rm -f bin/cache/flutter_tools.snapshot bin/cache/flutter_tools.stamp
+```
+否则改动不会生效。
+
+---
+
+## 六、项目版本号
+
+当前版本：`v1.17.1+59`（位于 `app/pubspec.yaml`）
+
+版本更新时同步更新：
+- `pubspec.yaml` 中的 `version:` 字段
+- Inno Setup 脚本中的版本号
+- 构建产物的 README.md
+
+---
+
+## 七、自动复制改造要求
+
+- PC 端：发送文件时不弹窗（直接走确认流程）
+- Android 端：发送面板正常消失
+- 3 状态选择器：off / favorites / on（互斥逻辑在 receive_tab.dart）
