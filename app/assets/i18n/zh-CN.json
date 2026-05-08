@@ -181,6 +181,8 @@
     "deleteHistory": "删除历史",
     "empty": "无历史记录。",
     "entryActions": {
+      "paste": "粘贴内容",
+      "viewDetails": "详细信息",
       "open": "打开文件",
       "showInFolder": "在文件管理器中显示",
       "info": "信息",

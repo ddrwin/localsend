@@ -189,6 +189,8 @@
     "deleteHistory": "Delete history",
     "empty": "The history is empty.",
     "entryActions": {
+      "paste": "Paste content",
+      "viewDetails": "View details",
       "open": "Open file",
       "showInFolder": "Show in folder",
       "info": "Information",

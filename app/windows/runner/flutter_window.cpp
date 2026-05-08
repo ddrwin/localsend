@@ -4,6 +4,10 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+// MethodChannel for simulate-paste
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
+
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
@@ -25,6 +29,33 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+
+  // Set up simulate-paste channel
+  paste_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(), "localsend/paste",
+      &flutter::StandardMethodCodec::GetInstance());
+  paste_channel_->SetMethodCallHandler(
+      [](const auto& call, auto result) {
+        if (call.method_name() == "simulatePaste") {
+          // Ctrl+V via SendInput (stable Windows API since Win2K)
+          INPUT inputs[4] = {};
+          inputs[0].type = INPUT_KEYBOARD;
+          inputs[0].ki.wVk = VK_CONTROL;
+          inputs[1].type = INPUT_KEYBOARD;
+          inputs[1].ki.wVk = 0x56; // 'V'
+          inputs[2].type = INPUT_KEYBOARD;
+          inputs[2].ki.wVk = 0x56;
+          inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
+          inputs[3].type = INPUT_KEYBOARD;
+          inputs[3].ki.wVk = VK_CONTROL;
+          inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
+          ::SendInput(4, inputs, sizeof(INPUT));
+          result->Success(flutter::EncodableValue(true));
+        } else {
+          result->NotImplemented();
+        }
+      });
+
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   return true;
 }

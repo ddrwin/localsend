@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/persistence/receive_history_entry.dart';
@@ -13,6 +15,8 @@ import 'package:localsend_app/util/native/directories.dart';
 import 'package:localsend_app/util/native/open_file.dart';
 import 'package:localsend_app/util/native/open_folder.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
+import 'package:localsend_app/util/native/simulate_paste.dart';
+import 'package:localsend_app/util/ui/snackbar.dart';
 import 'package:localsend_app/widget/dialogs/file_info_dialog.dart';
 import 'package:localsend_app/widget/dialogs/history_clear_dialog.dart';
 import 'package:localsend_app/widget/file_thumbnail.dart';
@@ -22,6 +26,8 @@ import 'package:refena_flutter/refena_flutter.dart';
 import 'package:routerino/routerino.dart';
 
 enum _EntryOption {
+  paste,
+  viewDetails,
   open,
   showInFolder,
   info,
@@ -29,6 +35,8 @@ enum _EntryOption {
 
   String get label {
     return switch (this) {
+      _EntryOption.paste => t.receiveHistoryPage.entryActions.paste,
+      _EntryOption.viewDetails => t.receiveHistoryPage.entryActions.viewDetails,
       _EntryOption.open => t.receiveHistoryPage.entryActions.open,
       _EntryOption.showInFolder => t.receiveHistoryPage.entryActions.showInFolder,
       _EntryOption.info => t.receiveHistoryPage.entryActions.info,
@@ -39,6 +47,7 @@ enum _EntryOption {
 
 const _optionsAll = _EntryOption.values;
 final _optionsWithoutOpen = [_EntryOption.info, _EntryOption.delete];
+final _optionsMessage = [_EntryOption.paste, _EntryOption.viewDetails, _EntryOption.delete];
 
 class ReceiveHistoryPage extends StatelessWidget {
   const ReceiveHistoryPage({super.key});
@@ -131,9 +140,12 @@ class ReceiveHistoryPage extends StatelessWidget {
                   onTap: entry.path != null || entry.isMessage
                       ? () async {
                           if (entry.isMessage) {
-                            context.redux(receivePageControllerProvider).dispatch(InitReceivePageFromHistoryMessageAction(entry: entry));
-                            // ignore: unawaited_futures
-                            context.push(() => const ReceivePage());
+                            // 直接粘贴：复制到剪贴板 + 模拟粘贴
+                            await Clipboard.setData(ClipboardData(text: entry.fileName));
+                            final pasted = await simulatePaste();
+                            if (!pasted && context.mounted) {
+                              context.showSnackBar(SnackBar(content: Text(t.general.copiedToClipboard)));
+                            }
                             return;
                           }
 
@@ -174,6 +186,19 @@ class ReceiveHistoryPage extends StatelessWidget {
                       PopupMenuButton<_EntryOption>(
                         onSelected: (_EntryOption item) async {
                           switch (item) {
+                            case _EntryOption.paste:
+                              await Clipboard.setData(ClipboardData(text: entry.fileName));
+                              final pasted = await simulatePaste();
+                              if (!pasted && context.mounted) {
+                                context.showSnackBar(SnackBar(content: Text(t.general.copiedToClipboard)));
+                              }
+                              break;
+                            case _EntryOption.viewDetails:
+                              context.redux(receivePageControllerProvider).dispatch(InitReceivePageFromHistoryMessageAction(entry: entry));
+                              if (context.mounted) {
+                                await context.push(() => const ReceivePage());
+                              }
+                              break;
                             case _EntryOption.open:
                               await _openFile(context, entry, context.redux(receiveHistoryProvider));
                               break;
@@ -199,7 +224,7 @@ class ReceiveHistoryPage extends StatelessWidget {
                           }
                         },
                         itemBuilder: (BuildContext context) {
-                          return (entry.path != null ? _optionsAll : _optionsWithoutOpen).map((e) {
+                          return (entry.isMessage ? _optionsMessage : entry.path != null ? _optionsAll : _optionsWithoutOpen).map((e) {
                             return PopupMenuItem<_EntryOption>(
                               value: e,
                               child: Text(e.label),

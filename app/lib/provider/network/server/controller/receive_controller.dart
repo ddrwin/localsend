@@ -38,6 +38,7 @@ import 'package:localsend_app/provider/receive_history_provider.dart';
 import 'package:localsend_app/provider/selection/selected_receiving_files_provider.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
+import 'package:localsend_app/util/native/simulate_paste.dart';
 import 'package:localsend_app/util/native/directories.dart';
 import 'package:localsend_app/util/native/file_saver.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
@@ -301,6 +302,7 @@ class ReceiveController {
         if (settings.autoCopyText) {
           _debugFileLog('Auto-copy triggered: copying to clipboard, sending empty selection to stream');
           Clipboard.setData(ClipboardData(text: message));
+          simulatePaste();
           _logger.info('Auto-copied text message to clipboard');
           streamController.add({});
         }
