@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:common/isolate.dart';
 import 'package:common/model/device.dart';
@@ -36,7 +38,15 @@ class SettingsService extends PureNotifier<SettingsState> {
   SettingsService(this._persistence);
 
   @override
-  SettingsState init() => SettingsState(
+  SettingsState init() {
+    // quickSave and quickSaveFromFavorites are mutually exclusive (3-state selector: off/favorites/on)
+    final rawQuickSave = _persistence.isQuickSave();
+    final rawQuickSaveFromFavorites = _persistence.isQuickSaveFromFavorites();
+    if (rawQuickSave && rawQuickSaveFromFavorites) {
+      // Invalid state - both can't be true. Prefer quickSave.
+      unawaited(_persistence.setQuickSaveFromFavorites(false));
+    }
+    return SettingsState(
         showToken: _persistence.getShowToken(),
         alias: _persistence.getAlias(),
         theme: _persistence.getTheme(),
@@ -49,8 +59,8 @@ class SettingsService extends PureNotifier<SettingsState> {
         destination: _persistence.getDestination(),
         saveToGallery: _persistence.isSaveToGallery(),
         saveToHistory: _persistence.isSaveToHistory(),
-        quickSave: _persistence.isQuickSave(),
-        quickSaveFromFavorites: _persistence.isQuickSaveFromFavorites(),
+        quickSave: rawQuickSave,
+        quickSaveFromFavorites: rawQuickSaveFromFavorites && !rawQuickSave,
         autoCopyText: _persistence.isAutoCopyText(),
         receivePin: _persistence.getReceivePin(),
         autoFinish: _persistence.isAutoFinish(),
@@ -65,6 +75,7 @@ class SettingsService extends PureNotifier<SettingsState> {
         discoveryTimeout: _persistence.getDiscoveryTimeout(),
         advancedSettings: _persistence.getAdvancedSettingsEnabled(),
       );
+  }
 
   Future<void> setAlias(String alias) async {
     await _persistence.setAlias(alias);

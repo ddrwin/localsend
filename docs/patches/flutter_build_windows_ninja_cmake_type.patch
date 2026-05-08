@@ -1,0 +1,39 @@
+From: ddrwin <ddrwin@localsend>
+Date: Thu, 8 May 2026 15:00:00 +0800
+Subject: [PATCH] Fix Ninja single-config generator: $<CONFIG> evaluates to empty
+
+Without CMAKE_BUILD_TYPE, Ninja (single-config generator) causes CMake's
+$<CONFIG> generator expression to evaluate to an empty string. This makes
+tool_backend.bat receive an empty build mode, which causes the wrong
+Flutter engine variant (debug 45MB) to be assembled instead of release (18MB).
+
+The debug engine DLL causes TLS handshake failures in the rhttp/rustls
+client when connecting to the Dart HTTPS server.
+
+Upstream issue: https://github.com/localsend/localsend/issues/3028
+
+--- a/packages/flutter_tools/lib/src/windows/build_windows.dart
++++ b/packages/flutter_tools/lib/src/windows/build_windows.dart
+@@ -98,6 +98,7 @@
+       buildDir: buildDirectory,
+       sourceDir: windowsProject.cmakeFile.parent,
++      buildModeName: buildModeName,
+     );
+     if (visualStudio.displayVersion == '17.1.0') {
+       _fixBrokenCmakeGeneration(buildDirectory);
+@@ -175,7 +176,7 @@
+   required TargetPlatform targetPlatform,
+   required Directory buildDir,
+   required Directory sourceDir,
++  required String buildModeName,
+ }) async {
+   final Stopwatch sw = Stopwatch()..start();
+
+@@ -196,6 +197,8 @@
+         if (generator != 'Ninja')
+           getCmakeWindowsArch(targetPlatform),
++        if (generator == 'Ninja')
++          '-DCMAKE_BUILD_TYPE=${sentenceCase(buildModeName)}',
+         '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
+       ],
+       trace: true,

@@ -939,6 +939,7 @@ class TranslationsDialogsMessageInputEn {
   // Translations
   String get title => 'Type message';
   String get multiline => 'Multiline';
+  String get sendToAll => 'Send to all';
 }
 
 // Path: dialogs.noFiles

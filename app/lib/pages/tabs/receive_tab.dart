@@ -101,9 +101,12 @@ class ReceiveTab extends StatelessWidget {
                               }
                             },
                             selected: {
-                              if (!vm.quickSaveSettings && !vm.quickSaveFromFavoritesSettings) _QuickSaveMode.off,
-                              if (vm.quickSaveFromFavoritesSettings) _QuickSaveMode.favorites,
-                              if (vm.quickSaveSettings) _QuickSaveMode.on,
+                              if (vm.quickSaveSettings)
+                                _QuickSaveMode.on
+                              else if (vm.quickSaveFromFavoritesSettings)
+                                _QuickSaveMode.favorites
+                              else
+                                _QuickSaveMode.off,
                             },
                             segments: [
                               ButtonSegment(

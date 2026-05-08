@@ -11,6 +11,8 @@ import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/cross_file.dart';
 import 'package:localsend_app/pages/apk_picker_page.dart';
 import 'package:localsend_app/provider/device_info_provider.dart';
+import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
+import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/util/determine_image_type.dart';
 import 'package:localsend_app/util/file_path_helper.dart';
@@ -258,9 +260,27 @@ Future<void> _pickMedia(BuildContext context, Ref ref) async {
 }
 
 Future<void> _pickText(BuildContext context, Ref ref) async {
-  final result = await showDialog<String>(context: context, builder: (_) => const MessageInputDialog());
-  if (result != null) {
-    ref.redux(selectedSendingFilesProvider).dispatch(AddMessageAction(message: result));
+  final messenger = ScaffoldMessenger.of(context);
+  final result = await showDialog<MessageInputResult>(context: context, builder: (_) => const MessageInputDialog());
+  if (result == null) return;
+
+  ref.redux(selectedSendingFilesProvider).dispatch(AddMessageAction(message: result.text));
+
+  if (result.sendToAll) {
+    final devices = ref.read(nearbyDevicesProvider).devices.values.toList();
+    if (devices.isEmpty) {
+      messenger.showSnackBar(SnackBar(content: Text(t.dialogs.noFiles.title)));
+      return;
+    }
+    for (final device in devices) {
+      // ignore: unawaited_futures
+      ref.notifier(sendProvider).startSession(
+        target: device,
+        files: ref.read(selectedSendingFilesProvider),
+        background: true,
+      );
+    }
+    messenger.showSnackBar(SnackBar(content: Text(t.general.finished)));
   }
 }
 

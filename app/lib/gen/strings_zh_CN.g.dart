@@ -1369,6 +1369,8 @@ class _TranslationsDialogsMessageInputZhCn extends TranslationsDialogsMessageInp
   String get title => '输入消息';
   @override
   String get multiline => '多行';
+  @override
+  String get sendToAll => '发送到所有设备';
 }
 
 // Path: dialogs.noFiles

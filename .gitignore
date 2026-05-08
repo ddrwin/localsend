@@ -6,6 +6,9 @@
 
 .refena_inspector/
 
+# Build output scripts
+/app/C:tempninja_build_out.txt
+
 /secrets
 localsend_autocopy.log
 

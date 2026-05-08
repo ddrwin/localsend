@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:routerino/routerino.dart';
 
+/// Result from [MessageInputDialog].
+/// [text] is always non-null when [okay] is true.
+/// [sendToAll] is true when the user chose "Send to all devices".
+class MessageInputResult {
+  final String text;
+  final bool sendToAll;
+
+  const MessageInputResult(this.text, this.sendToAll);
+}
+
 class MessageInputDialog extends StatefulWidget {
   final String? initialText;
 
@@ -26,6 +36,10 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
     super.dispose();
   }
 
+  void _pop(String text, {bool sendToAll = false}) {
+    Navigator.of(context).pop(MessageInputResult(text, sendToAll));
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -37,17 +51,27 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
         autofocus: true,
       ),
       actions: [
-        TextButton(
-          onPressed: () => context.pop(),
-          child: Text(t.general.cancel),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          ),
-          onPressed: () => context.pop(_textController.text),
-          child: Text(t.general.confirm),
+        Row(
+          children: [
+            TextButton(
+              onPressed: () => context.pop(),
+              child: Text(t.general.cancel),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              onPressed: () => _pop(_textController.text),
+              child: Text(t.general.confirm),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () => _pop(_textController.text, sendToAll: true),
+              child: Text(t.dialogs.messageInput.sendToAll),
+            ),
+          ],
         ),
       ],
     );

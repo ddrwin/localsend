@@ -9,7 +9,10 @@ allprojects {
 
 rootProject.buildDir = '../build'
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    // Only set custom buildDir for local project modules, not pub cache plugins
+    if (project.projectDir.absolutePath.startsWith(rootProject.projectDir.absolutePath)) {
+        project.buildDir = "${rootProject.buildDir}/${project.name}"
+    }
 }
 
 // temporary fix to keep using device_apps

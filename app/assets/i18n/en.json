@@ -424,7 +424,8 @@
     },
     "messageInput": {
       "title": "Type message",
-      "multiline": "Multiline"
+      "multiline": "Multiline",
+      "sendToAll": "Send to all"
     },
     "noFiles": {
       "title": "No files selected",

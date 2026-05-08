@@ -415,7 +415,8 @@
     },
     "messageInput": {
       "title": "输入消息",
-      "multiline": "多行"
+      "multiline": "多行",
+      "sendToAll": "发送到所有设备"
     },
     "noFiles": {
       "title": "未选择文件",
