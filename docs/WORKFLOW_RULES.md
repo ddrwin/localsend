@@ -2,13 +2,14 @@
 
 > 最后更新：2026-05-08
 >
-> ## ⚡ 核心规则（只需记这一条）
+> ## ⚡ 核心规则（只需记这两条）
 >
-> **每次发布时，执行 [`docs/RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md)，逐条打勾。**
+> **1. 每次发布时** → 执行 [`docs/RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md)，逐条打勾。
+> **2. 每次结束会话前** → 执行 [`docs/CHECK_BILL.md`](CHECK_BILL.md)，对账关机。
 >
-> 所有步骤（归档、写 log、案例日志、GitHub、同步）全部在 checklist 里。做完它就不会漏。
+> **Bug 追踪** → 见 [`docs/BUG_INVENTORY.md`](BUG_INVENTORY.md)，每个 bug 唯一编号 B001~B006。
 >
-> ---
+> --
 >
 > 本文件三个位置同步存放：
 > 1. **工作目录/公共文档** `E:\CodeBase\localsend\docs\WORKFLOW_RULES.md`
