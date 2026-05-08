@@ -76,7 +76,7 @@ class _ReceivePageState extends State<ReceivePage> with Refena {
                       children: [
                         Expanded(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: vm.message != null ? MainAxisAlignment.start : MainAxisAlignment.center,
                             children: [
                               if (vm.showSenderInfo && !smallUi)
                                 Padding(
@@ -125,13 +125,12 @@ class _ReceivePageState extends State<ReceivePage> with Refena {
                                 textAlign: TextAlign.center,
                               ),
                               if (vm.message != null)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 20),
-                                      child: SizedBox(
-                                        height: 100,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      const SizedBox(height: 20),
+                                      Expanded(
                                         child: Card(
                                           child: SingleChildScrollView(
                                             child: Padding(
@@ -143,44 +142,44 @@ class _ReceivePageState extends State<ReceivePage> with Refena {
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            unawaited(
-                                              Clipboard.setData(ClipboardData(text: vm.message!)),
-                                            );
-                                            if (checkPlatformIsDesktop()) {
-                                              context.showSnackBar(t.general.copiedToClipboard);
-                                            }
-                                            vm.onAccept();
-                                            context.pop();
-                                          },
-                                          child: Text(t.general.copy),
-                                        ),
-                                        if (vm.isLink)
-                                          Padding(
-                                            padding: const EdgeInsetsDirectional.only(start: 20),
-                                            child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                                              ),
-                                              onPressed: () {
-                                                // ignore: discarded_futures
-                                                launchUrl(Uri.parse(vm.message!), mode: LaunchMode.externalApplication);
-                                                vm.onAccept();
-                                                context.pop();
-                                              },
-                                              child: Text(t.general.open),
-                                            ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              unawaited(
+                                                Clipboard.setData(ClipboardData(text: vm.message!)),
+                                              );
+                                              if (checkPlatformIsDesktop()) {
+                                                context.showSnackBar(t.general.copiedToClipboard);
+                                              }
+                                              vm.onAccept();
+                                              context.pop();
+                                            },
+                                            child: Text(t.general.copy),
                                           ),
-                                      ],
-                                    ),
-                                  ],
+                                          if (vm.isLink)
+                                            Padding(
+                                              padding: const EdgeInsetsDirectional.only(start: 20),
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                                ),
+                                                onPressed: () {
+                                                  // ignore: discarded_futures
+                                                  launchUrl(Uri.parse(vm.message!), mode: LaunchMode.externalApplication);
+                                                  vm.onAccept();
+                                                  context.pop();
+                                                },
+                                                child: Text(t.general.open),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                             ],
                           ),

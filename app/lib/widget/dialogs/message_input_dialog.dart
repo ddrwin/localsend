@@ -43,7 +43,22 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(t.dialogs.messageInput.title),
+      title: Row(
+        children: [
+          Expanded(child: Text(t.dialogs.messageInput.title)),
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              iconSize: 20,
+              icon: const Icon(Icons.close),
+              onPressed: () => context.pop(),
+              tooltip: t.general.cancel,
+            ),
+          ),
+        ],
+      ),
       content: TextFormField(
         controller: _textController,
         keyboardType: TextInputType.multiline,
@@ -53,10 +68,6 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
       actions: [
         Row(
           children: [
-            TextButton(
-              onPressed: () => context.pop(),
-              child: Text(t.general.cancel),
-            ),
             const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
