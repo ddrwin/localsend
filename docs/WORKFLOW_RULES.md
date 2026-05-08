@@ -35,15 +35,28 @@ E:\CodeBase\
 ### 目录命名规范
 
 ```
-LocalSend_<YYYYMMDD_HHMMSS>_<简短描述>
+LocalSend_<YYYYMMDD_HHMMSS>_<平台>_<类型>_<描述>
 ```
 
 - 时间戳在前，按字母排序即按时间排序
+- **平台**标注：`PC`（Windows）/ `Android` / `PC便携版+AndroidAPK`（混合）
+- **类型**标注：
+  - PC：`便携版`（散装 exe+dll）/ `安装版`（Inno Setup 安装包）
+  - Android：`APK`（安卓安装包）
 - 描述使用中文，简短一句话概括本次构建特点
+
+示例：
+```
+LocalSend_20260508_180000_PC安装版_自动粘贴布局同步
+LocalSend_20260508_181000_AndroidAPK_修复导入路径SnackBar
+LocalSend_20260508_162200_AndroidAPK_群发修复
+LocalSend_20260508_151600_PC安装版_Ninja编译修复
+LocalSend_20260507_201200_PC便携版+AndroidAPK_自动复制完成
+```
 
 ### 每次新增构建产物的步骤
 
-1. 在 `build_outputs\LocalSend\` 下创建新目录，按命名规范命名
+1. 在 `build_outputs\LocalSend\` 下创建新目录，按命名规范命名（含平台+类型）
 2. 将安装包/便携版/APK 放入该目录
 3. 在该目录内创建 `README.md`，说明：
    - 版本号
@@ -54,6 +67,9 @@ LocalSend_<YYYYMMDD_HHMMSS>_<简短描述>
 4. 更新 `BUILD_LOG.md`，追加一条记录
 5. 如果推了 GitHub，更新 `GITHUB_LOG.md`
 6. 将 BUILD_LOG.md 和 GITHUB_LOG.md 镜像到 D 盘项目备份目录
+7. **必须更新案例日志**（`docs/case_logs/`），记录本次构建的坑点、问题、决策
+
+> ⚠️ 案例日志与构建产物同时生成，不可跳过。即使没有特别的问题，也要记录"本次无异常"及构建版本信息。
 
 ---
 
@@ -227,3 +243,25 @@ unzip -o "旧APK.apk" "lib/armeabi-v7a/librhttp.so" -d "android/app/src/main/jni
 - PC 端：发送文件时不弹窗（直接走确认流程）
 - Android 端：发送面板正常消失
 - 3 状态选择器：off / favorites / on（互斥逻辑在 receive_tab.dart）
+
+---
+
+## 十一、粘贴功能已知问题（2026-05-08）
+
+### Windows 历史面板粘贴 — 焦点限制
+
+**问题：** 点击 LocalSend 历史面板时，焦点从浏览器/其他应用移到 LocalSend，此时 SendInput 模拟 Ctrl+V 会粘到 LocalSend 自身，而非目标应用。
+
+**限制：** Windows 没有 API 可以"记住之前光标位置并往那里粘贴"。这是操作系统的安全限制。
+
+**当前方案：** 点击历史面板只复制到剪贴板，不模拟粘贴，弹出"已复制到剪贴板"提示，由用户手动 Ctrl+V。
+
+### TLS handshake EOF（2026-05-08 发现）
+
+**现象：** Windows 端连接 Android 设备时报错：
+```
+tls handshake eof
+hyper_util::client::legacy::Error(Connect, Custom { kind: UnexpectedEof })
+```
+
+**排查结论：** 排除了编译问题（引擎 Release 正确），旧版 APK/便携版同样报错。curl（schannel）能正常连接。可能与目标设备 TLS 配置或 rustls 兼容性有关，待进一步排查。
