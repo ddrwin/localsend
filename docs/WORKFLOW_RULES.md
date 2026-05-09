@@ -1,6 +1,6 @@
 # LocalSend 项目协作规则
 
-> 最后更新：2026-05-08
+> 最后更新：2026-05-09
 >
 > ## ⚡ 核心规则（只需记这两条）
 >
@@ -78,6 +78,21 @@ LocalSend_20260507_201200_PC便携版+AndroidAPK_自动复制完成
 - **每次有源码变更时，必须 push 到 GitHub**（除非明确告知无需推送）
 - 每次推送后更新 `GITHUB_LOG.md`
 - 如需在 GitHub 提供下载，创建 GitHub Release 并上传附件
+
+### GitHub Release 必须同步存档到本地
+
+每次创建 GitHub Release 后，**必须立即将附件存档到本地 `E:\CodeBase\build_outputs\LocalSend\`**：
+
+1. 从 Release assets 下载或直接复制已编译的安装包/APK
+2. 按命名规范创建目录：`LocalSend_YYYYMMDD_HHMMSS_平台_类型_描述`
+3. 在目录内创建 `README.md`（版本号、构建时间、环境、GitHub Release 链接）
+4. 更新 `E:\CodeBase\build_outputs\BUILD_LOG.md`（追加一条记录，含 Release 链接）
+5. 更新 `E:\CodeBase\build_outputs\GITHUB_LOG.md`（追加 Release 记录）
+
+**禁止**以下行为：
+- ⛔ 建了 GitHub Release 但本地不留档
+- ⛔ 本地 build_outputs 有产物但 GitHub 没 Release（两者必须同步）
+- ⛔ 覆盖式写入（必须新建目录，不得覆盖旧版本）
 
 ### 提交信息规范
 

@@ -42,7 +42,12 @@
   - 创建 Release：`v1.17.1-android-rN`
   - Body 写清楚变更内容
   - 上传 APK/安装包到 Release assets
-- [ ] **4.3 更新 GITHUB_LOG.md**（含 Release 链接）
+- [ ] **4.3 下载 Release 附件到本地 build_outputs**
+  - 从 Release 下载或复制安装包/APK 到 `E:\CodeBase\build_outputs\LocalSend\`
+  - 命名：`LocalSend_YYYYMMDD_HHMMSS_平台_类型_描述`
+  - 创建 `README.md`（版本号 + 构建时间 + 环境 + Release 链接）
+- [ ] **4.4 更新 BUILD_LOG.md**（追加一条记录）
+- [ ] **4.5 更新 GITHUB_LOG.md**（含 Release 链接）
 
 ## □ 五、规则文档同步（三处）
 
