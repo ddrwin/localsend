@@ -26,6 +26,8 @@ import 'package:localsend_app/provider/device_info_provider.dart';
 import 'package:localsend_app/provider/http_provider.dart';
 import 'package:localsend_app/provider/progress_provider.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
+import 'package:localsend_app/model/persistence/send_history_entry.dart';
+import 'package:localsend_app/provider/persistence_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/widget/dialogs/pin_dialog.dart';
 import 'package:logging/logging.dart';
@@ -54,6 +56,11 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     return {};
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   /// Starts a session.
   /// If [background] is true, then the session closes itself on success and no pages will be open
   /// If [background] is false, then this method will open pages by itself and waits for user input to close the session.
@@ -62,9 +69,10 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     required List<CrossFile> files,
     required bool background,
   }) async {
+    final sessionId = _uuid.v4();
+
     final client = ref.read(httpProvider).longLiving;
     final cancelToken = CancelToken();
-    final sessionId = _uuid.v4();
 
     final requestState = SendSessionState(
       sessionId: sessionId,
@@ -265,7 +273,6 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     }
 
     if (fileMap.isEmpty) {
-      // receiver has nothing selected
       state = state.updateSession(
         sessionId: sessionId,
         state: (s) => s?.copyWith(
@@ -346,10 +353,10 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
 
     await Future.wait(futures);
 
-    _finish(sessionId: sessionId);
+    await _finish(sessionId: sessionId);
   }
 
-  void _finish({required String sessionId}) {
+  Future<void> _finish({required String sessionId}) async {
     final sessionState = state[sessionId];
     if (sessionState == null) {
       return;
@@ -360,10 +367,16 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     } else {
       final hasError = sessionState.files.values.any((file) => file.status == FileStatus.failed);
       if (!hasError && sessionState.background == true) {
+        // record history
+        await _recordSendHistory(sessionState);
         // close session because everything is fine and it is in background
         closeSession(sessionId);
         _logger.info('Transfer finished and session removed.');
       } else {
+        // record history for non-background success
+        if (!hasError) {
+          await _recordSendHistory(sessionState);
+        }
         // keep session alive when there are errors or currently in foreground
         state = state.updateSession(
           sessionId: sessionId,
@@ -488,7 +501,7 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     if (isRetry) {
       final state = this.state[sessionId];
       if (state != null && state.files.values.map((e) => e.status).isFinishedOrError) {
-        _finish(sessionId: sessionId);
+        await _finish(sessionId: sessionId);
         return false;
       }
     }
@@ -566,6 +579,34 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
 
   void setBackground(String sessionId, bool background) {
     state = state.updateSession(sessionId: sessionId, state: (s) => s?.copyWith(background: background));
+  }
+
+  Future<void> _recordSendHistory(SendSessionState sessionState) async {
+    try {
+      final files = sessionState.files.values.toList();
+      final totalSize = files.fold<int>(0, (sum, f) => sum + f.file.size);
+      final firstName = files.length == 1 ? files.first.file.fileName : '${files.first.file.fileName} + ${files.length - 1} more';
+      final fileType = files.first.file.fileType;
+      final timestamp = DateTime.now().toUtc();
+
+      final newEntry = SendHistoryEntry(
+        id: sessionState.sessionId,
+        fileName: firstName,
+        fileType: fileType,
+        fileSize: totalSize,
+        targetAlias: sessionState.target.alias,
+        timestamp: timestamp,
+      );
+
+      final persistence = ref.read(persistenceProvider);
+      final current = persistence.getSendHistory();
+      final updated = [newEntry, ...current].take(30).toList();
+      await persistence.setSendHistory(updated);
+
+      _logger.info('Send history recorded: ${newEntry.fileName} -> ${newEntry.targetAlias}');
+    } catch (e, st) {
+      _logger.warning('Failed to record send history', e, st);
+    }
   }
 }
 

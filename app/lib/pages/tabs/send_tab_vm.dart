@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:common/model/device.dart';
 import 'package:common/model/session_status.dart';
 import 'package:flutter/material.dart';
+import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/cross_file.dart';
 import 'package:localsend_app/model/persistence/favorite_device.dart';
 import 'package:localsend_app/model/send_mode.dart';
@@ -9,6 +12,7 @@ import 'package:localsend_app/pages/progress_page.dart';
 import 'package:localsend_app/pages/send_page.dart';
 import 'package:localsend_app/pages/web_send_page.dart';
 import 'package:localsend_app/provider/favorites_provider.dart';
+import 'package:localsend_app/util/ui/snackbar.dart';
 import 'package:localsend_app/provider/local_ip_provider.dart';
 import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
 import 'package:localsend_app/provider/network/scan_facade.dart';
@@ -32,6 +36,7 @@ class SendTabVm {
   final List<FavoriteDevice> favoriteDevices;
   final Future<void> Function(BuildContext context) onTapAddress;
   final Future<void> Function(BuildContext context) onTapFavorite;
+  final Future<void> Function(BuildContext context) onTapSendToAllFavorites;
   final Future<void> Function(BuildContext context, SendMode mode) onTapSendMode;
   final Future<void> Function(BuildContext context, Device device) onToggleFavorite;
   final Future<void> Function(BuildContext context, Device device) onTapDevice;
@@ -45,6 +50,7 @@ class SendTabVm {
     required this.favoriteDevices,
     required this.onTapAddress,
     required this.onTapFavorite,
+    required this.onTapSendToAllFavorites,
     required this.onTapSendMode,
     required this.onToggleFavorite,
     required this.onTapDevice,
@@ -100,6 +106,36 @@ final sendTabVmProvider = ViewProvider((ref) {
               files: files,
               background: false,
             );
+      }
+    },
+    onTapSendToAllFavorites: (context) async {
+      final files = ref.read(selectedSendingFilesProvider);
+      if (files.isEmpty) {
+        await context.pushBottomSheet(() => const NoFilesDialog());
+        return;
+      }
+
+      final nearbyDevices = ref.read(nearbyDevicesProvider).devices.values;
+      final favorites = ref.read(favoritesProvider);
+
+      final futures = <Future<void>>[];
+      for (final favorite in favorites) {
+        final device = nearbyDevices.firstWhereOrNull(
+          (d) => d.fingerprint == favorite.fingerprint,
+        );
+        if (device != null) {
+          futures.add(ref.notifier(sendProvider).startSession(
+            target: device,
+            files: files,
+            background: true,
+          ));
+        }
+      }
+
+      if (futures.isEmpty) return;
+      await Future.wait(futures);
+      if (context.mounted) {
+        context.showSnackBar(t.general.finished);
       }
     },
     onTapSendMode: (context, mode) async {

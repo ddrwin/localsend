@@ -12,6 +12,11 @@ class RhttpWrapper implements CustomHttpClient {
     return RhttpWrapper._(client);
   }
 
+  factory RhttpWrapper.createDiscovery(Duration timeout, StoredSecurityContext securityContext) {
+    final client = createRhttpClient(timeout, securityContext, requestClientCert: false);
+    return RhttpWrapper._(client);
+  }
+
   @override
   Future<String> get({
     required String uri,
@@ -67,7 +72,7 @@ class RhttpWrapper implements CustomHttpClient {
   }
 }
 
-RhttpClient createRhttpClient(Duration timeout, StoredSecurityContext securityContext, {Interceptor? interceptor}) {
+RhttpClient createRhttpClient(Duration timeout, StoredSecurityContext securityContext, {Interceptor? interceptor, bool requestClientCert = false}) {
   return RhttpClient.createSync(
     settings: ClientSettings(
       timeoutSettings: TimeoutSettings(
@@ -75,10 +80,12 @@ RhttpClient createRhttpClient(Duration timeout, StoredSecurityContext securityCo
       ),
       tlsSettings: TlsSettings(
         verifyCertificates: false,
-        clientCertificate: ClientCertificate(
-          certificate: securityContext.certificate,
-          privateKey: securityContext.privateKey,
-        ),
+        clientCertificate: requestClientCert
+            ? ClientCertificate(
+                certificate: securityContext.certificate,
+                privateKey: securityContext.privateKey,
+              )
+            : null,
       ),
     ),
     interceptors: interceptor != null ? [interceptor] : [],

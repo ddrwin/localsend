@@ -261,7 +261,7 @@ Future<void> _pickMedia(BuildContext context, Ref ref) async {
 
 Future<void> _pickText(BuildContext context, Ref ref) async {
   final messenger = ScaffoldMessenger.of(context);
-  final result = await showDialog<MessageInputResult>(context: context, builder: (_) => const MessageInputDialog());
+  final result = await showDialog<MessageInputResult>(context: context, builder: (_) => MessageInputDialog(ref: ref));
   if (result == null) return;
 
   ref.redux(selectedSendingFilesProvider).dispatch(AddMessageAction(message: result.text));
@@ -272,15 +272,16 @@ Future<void> _pickText(BuildContext context, Ref ref) async {
       messenger.showSnackBar(SnackBar(content: Text(t.dialogs.noFiles.title)));
       return;
     }
-    for (final device in devices) {
-      // ignore: unawaited_futures
-      ref.notifier(sendProvider).startSession(
+    await Future.wait(devices.map((device) {
+      return ref.notifier(sendProvider).startSession(
         target: device,
         files: ref.read(selectedSendingFilesProvider),
         background: true,
       );
+    }));
+    if (context.mounted) {
+      messenger.showSnackBar(SnackBar(content: Text(t.general.finished)));
     }
-    messenger.showSnackBar(SnackBar(content: Text(t.general.finished)));
   }
 }
 

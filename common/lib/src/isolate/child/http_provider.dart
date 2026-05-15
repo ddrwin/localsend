@@ -47,10 +47,10 @@ class HttpClientCollection {
 }
 
 final httpProvider = ViewProvider((ref) {
-  final (clientFactory, securityContext, discoveryTimeout) =
-      ref.watch(syncProvider.select((state) => (state.httpClientFactory, state.securityContext, state.discoveryTimeout)));
+  final (clientFactory, discoveryClientFactory, securityContext, discoveryTimeout) =
+      ref.watch(syncProvider.select((state) => (state.httpClientFactory, state.httpDiscoveryClientFactory, state.securityContext, state.discoveryTimeout)));
   return HttpClientCollection(
-    discovery: clientFactory(Duration(milliseconds: discoveryTimeout), securityContext),
+    discovery: discoveryClientFactory(Duration(milliseconds: discoveryTimeout), securityContext),
     longLiving: clientFactory(const Duration(days: 30), securityContext),
   );
 });

@@ -21,6 +21,7 @@
     "files": "Files",
     "finished": "Finished",
     "hide": "Hide",
+    "lock": "Lock panel",
     "off": "Off",
     "offline": "Offline",
     "on": "On",
@@ -82,7 +83,8 @@
     },
     "sendModeHelp": "Explanation",
     "help": "Please ensure that the desired target is also on the same Wi-Fi network.",
-    "placeItems": "Place items to share."
+    "placeItems": "Place items to share.",
+    "sendToAllFavorites": "Send to all favorites"
   },
   "settingsTab": {
     "title": "Settings",
@@ -193,6 +195,18 @@
       "viewDetails": "View details",
       "open": "Open file",
       "showInFolder": "Show in folder",
+      "info": "Information",
+      "deleteFromHistory": "Delete from history"
+    }
+  },
+  "sendHistoryPage": {
+    "title": "Sent History",
+    "empty": "No sent history.",
+    "viewText": "View Text",
+    "entryActions": {
+      "copy": "Copy text",
+      "resend": "Resend",
+      "view": "View",
       "info": "Information",
       "deleteFromHistory": "Delete from history"
     }
@@ -427,7 +441,12 @@
     "messageInput": {
       "title": "Type message",
       "multiline": "Multiline",
-      "sendToAll": "Send to all"
+      "sendToAll": "Send to all devices",
+      "sendToFavorites": "Send to favorites",
+      "sendToSelected": "Send to selected device",
+      "modeFavorites": "Favorites",
+      "modeSelect": "Select",
+      "modeAll": "All"
     },
     "noFiles": {
       "title": "No files selected",

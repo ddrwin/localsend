@@ -43,6 +43,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   late final TranslationsTroubleshootPageEn troubleshootPage = TranslationsTroubleshootPageEn.internal(_root);
   late final TranslationsNetworkInterfacesPageEn networkInterfacesPage = TranslationsNetworkInterfacesPageEn.internal(_root);
   late final TranslationsReceiveHistoryPageEn receiveHistoryPage = TranslationsReceiveHistoryPageEn.internal(_root);
+  late final TranslationsSendHistoryPageEn sendHistoryPage = TranslationsSendHistoryPageEn.internal(_root);
   late final TranslationsApkPickerPageEn apkPickerPage = TranslationsApkPickerPageEn.internal(_root);
   late final TranslationsSelectedFilesPageEn selectedFilesPage = TranslationsSelectedFilesPageEn.internal(_root);
   late final TranslationsReceivePageEn receivePage = TranslationsReceivePageEn.internal(_root);
@@ -87,6 +88,7 @@ class TranslationsGeneralEn {
   String get files => 'Files';
   String get finished => 'Finished';
   String get hide => 'Hide';
+  String get lock => 'Lock panel';
   String get off => 'Off';
   String get offline => 'Offline';
   String get on => 'On';
@@ -140,6 +142,7 @@ class TranslationsSendTabEn {
   String get sendModeHelp => 'Explanation';
   String get help => 'Please ensure that the desired target is also on the same Wi-Fi network.';
   String get placeItems => 'Place items to share.';
+  String get sendToAllFavorites => 'Send to all favorites';
 }
 
 // Path: settingsTab
@@ -201,6 +204,19 @@ class TranslationsReceiveHistoryPageEn {
   String get deleteHistory => 'Delete history';
   String get empty => 'The history is empty.';
   late final TranslationsReceiveHistoryPageEntryActionsEn entryActions = TranslationsReceiveHistoryPageEntryActionsEn.internal(_root);
+}
+
+// Path: sendHistoryPage
+class TranslationsSendHistoryPageEn {
+  TranslationsSendHistoryPageEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+  String get title => 'Sent History';
+  String get empty => 'No sent history.';
+  String get viewText => 'View Text';
+  late final TranslationsSendHistoryPageEntryActionsEn entryActions = TranslationsSendHistoryPageEntryActionsEn.internal(_root);
 }
 
 // Path: apkPickerPage
@@ -753,6 +769,20 @@ class TranslationsReceiveHistoryPageEntryActionsEn {
   String get deleteFromHistory => 'Delete from history';
 }
 
+// Path: sendHistoryPage.entryActions
+class TranslationsSendHistoryPageEntryActionsEn {
+  TranslationsSendHistoryPageEntryActionsEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+  String get copy => 'Copy text';
+  String get resend => 'Resend';
+  String get view => 'View';
+  String get info => 'Information';
+  String get deleteFromHistory => 'Delete from history';
+}
+
 // Path: progressPage.total
 class TranslationsProgressPageTotalEn {
   TranslationsProgressPageTotalEn.internal(this._root);
@@ -941,7 +971,12 @@ class TranslationsDialogsMessageInputEn {
   // Translations
   String get title => 'Type message';
   String get multiline => 'Multiline';
-  String get sendToAll => 'Send to all';
+  String get sendToAll => 'Send to all devices';
+  String get sendToFavorites => 'Send to favorites';
+  String get sendToSelected => 'Send to selected device';
+  String get modeFavorites => 'Favorites';
+  String get modeSelect => 'Select';
+  String get modeAll => 'All';
 }
 
 // Path: dialogs.noFiles

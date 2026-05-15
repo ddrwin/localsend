@@ -152,6 +152,7 @@ Future<RefenaContainer> preInit(List<String> args) async {
           },
           rootIsolateToken: RootIsolateToken.instance!,
           httpClientFactory: RhttpWrapper.create,
+          httpDiscoveryClientFactory: RhttpWrapper.createDiscovery,
           securityContext: persistenceService.getSecurityContext(),
           deviceInfo: ref.read(deviceInfoProvider),
           alias: settings.alias,

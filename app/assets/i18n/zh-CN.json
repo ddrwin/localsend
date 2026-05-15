@@ -21,6 +21,7 @@
     "files": "文件",
     "finished": "已完成",
     "hide": "隐藏",
+    "lock": "锁定面板",
     "off": "关",
     "offline": "离线",
     "on": "开",
@@ -82,7 +83,8 @@
     },
     "sendModeHelp": "提示",
     "help": "请确保目标连接的是同一个 Wi‑Fi 网络。",
-    "placeItems": "列出要分享的项目"
+    "placeItems": "列出要分享的项目",
+    "sendToAllFavorites": "发送给所有收藏设备"
   },
   "settingsTab": {
     "title": "设置",
@@ -185,6 +187,18 @@
       "viewDetails": "详细信息",
       "open": "打开文件",
       "showInFolder": "在文件管理器中显示",
+      "info": "信息",
+      "deleteFromHistory": "从历史记录中删除"
+    }
+  },
+  "sendHistoryPage": {
+    "title": "发送历史",
+    "empty": "暂无发送历史。",
+    "viewText": "查看文本",
+    "entryActions": {
+      "copy": "复制文本",
+      "resend": "重新发送",
+      "view": "查看",
       "info": "信息",
       "deleteFromHistory": "从历史记录中删除"
     }
@@ -418,7 +432,12 @@
     "messageInput": {
       "title": "输入消息",
       "multiline": "多行",
-      "sendToAll": "发送到所有设备"
+      "sendToAll": "发送到所有设备",
+      "sendToFavorites": "发送到收藏设备",
+      "sendToSelected": "发送到选中设备",
+      "modeFavorites": "收藏发送",
+      "modeSelect": "选择发送",
+      "modeAll": "全部发送"
     },
     "noFiles": {
       "title": "未选择文件",

@@ -47,6 +47,8 @@ class TranslationsZhCn extends Translations {
   @override
   late final _TranslationsReceiveHistoryPageZhCn receiveHistoryPage = _TranslationsReceiveHistoryPageZhCn._(_root);
   @override
+  late final _TranslationsSendHistoryPageZhCn sendHistoryPage = _TranslationsSendHistoryPageZhCn._(_root);
+  @override
   late final _TranslationsApkPickerPageZhCn apkPickerPage = _TranslationsApkPickerPageZhCn._(_root);
   @override
   late final _TranslationsSelectedFilesPageZhCn selectedFilesPage = _TranslationsSelectedFilesPageZhCn._(_root);
@@ -129,6 +131,8 @@ class _TranslationsGeneralZhCn extends TranslationsGeneralEn {
   String get finished => '已完成';
   @override
   String get hide => '隐藏';
+  @override
+  String get lock => '锁定面板';
   @override
   String get off => '关';
   @override
@@ -221,6 +225,8 @@ class _TranslationsSendTabZhCn extends TranslationsSendTabEn {
   String get help => '请确保目标连接的是同一个 Wi‑Fi 网络。';
   @override
   String get placeItems => '列出要分享的项目';
+  @override
+  String get sendToAllFavorites => '发送给所有收藏设备';
 }
 
 // Path: settingsTab
@@ -292,6 +298,25 @@ class _TranslationsReceiveHistoryPageZhCn extends TranslationsReceiveHistoryPage
   String get empty => '无历史记录。';
   @override
   late final _TranslationsReceiveHistoryPageEntryActionsZhCn entryActions = _TranslationsReceiveHistoryPageEntryActionsZhCn._(_root);
+}
+
+// Path: sendHistoryPage
+class _TranslationsSendHistoryPageZhCn extends TranslationsSendHistoryPageEn {
+  _TranslationsSendHistoryPageZhCn._(TranslationsZhCn root)
+      : this._root = root,
+        super.internal(root);
+
+  final TranslationsZhCn _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get title => '发送历史';
+  @override
+  String get empty => '暂无发送历史。';
+  @override
+  String get viewText => '查看文本';
+  @override
+  late final _TranslationsSendHistoryPageEntryActionsZhCn entryActions = _TranslationsSendHistoryPageEntryActionsZhCn._(_root);
 }
 
 // Path: apkPickerPage
@@ -1109,6 +1134,27 @@ class _TranslationsReceiveHistoryPageEntryActionsZhCn extends TranslationsReceiv
   String get deleteFromHistory => '从历史记录中删除';
 }
 
+// Path: sendHistoryPage.entryActions
+class _TranslationsSendHistoryPageEntryActionsZhCn extends TranslationsSendHistoryPageEntryActionsEn {
+  _TranslationsSendHistoryPageEntryActionsZhCn._(TranslationsZhCn root)
+      : this._root = root,
+        super.internal(root);
+
+  final TranslationsZhCn _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get copy => '复制文本';
+  @override
+  String get resend => '重新发送';
+  @override
+  String get view => '查看';
+  @override
+  String get info => '信息';
+  @override
+  String get deleteFromHistory => '从历史记录中删除';
+}
+
 // Path: progressPage.total
 class _TranslationsProgressPageTotalZhCn extends TranslationsProgressPageTotalEn {
   _TranslationsProgressPageTotalZhCn._(TranslationsZhCn root)
@@ -1375,6 +1421,16 @@ class _TranslationsDialogsMessageInputZhCn extends TranslationsDialogsMessageInp
   String get multiline => '多行';
   @override
   String get sendToAll => '发送到所有设备';
+  @override
+  String get sendToFavorites => '发送到收藏设备';
+  @override
+  String get sendToSelected => '发送到选中设备';
+  @override
+  String get modeFavorites => '收藏发送';
+  @override
+  String get modeSelect => '选择发送';
+  @override
+  String get modeAll => '全部发送';
 }
 
 // Path: dialogs.noFiles

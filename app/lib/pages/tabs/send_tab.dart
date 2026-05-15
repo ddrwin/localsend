@@ -6,6 +6,7 @@ import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/send_mode.dart';
 import 'package:localsend_app/pages/selected_files_page.dart';
+import 'package:localsend_app/pages/send_history_page.dart';
 import 'package:localsend_app/pages/tabs/send_tab_vm.dart';
 import 'package:localsend_app/pages/troubleshoot_page.dart';
 import 'package:localsend_app/provider/animation_provider.dart';
@@ -22,6 +23,7 @@ import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/big_button.dart';
 import 'package:localsend_app/widget/custom_icon_button.dart';
 import 'package:localsend_app/widget/dialogs/add_file_dialog.dart';
+import 'package:localsend_app/widget/dialogs/message_input_dialog.dart';
 import 'package:localsend_app/widget/dialogs/send_mode_help_dialog.dart';
 import 'package:localsend_app/widget/file_thumbnail.dart';
 import 'package:localsend_app/widget/horizontal_clip_list_view.dart';
@@ -56,9 +58,47 @@ class SendTab extends StatelessWidget {
             if (vm.selectedFiles.isEmpty) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
-                child: Text(
-                  t.sendTab.selection.title,
-                  style: Theme.of(context).textTheme.titleMedium,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t.sendTab.selection.title,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    CustomIconButton(
+                      onPressed: () async {
+                        final resendText = await Navigator.of(context).push<String>(
+                          MaterialPageRoute(builder: (_) => const SendHistoryPage()),
+                        );
+
+                        if (resendText == null || !context.mounted) return;
+
+                        // User chose "Resend" from history — open message dialog pre-filled
+                        final result = await showDialog<MessageInputResult>(
+                          context: context,
+                          builder: (_) => MessageInputDialog(initialText: resendText, ref: ref),
+                        );
+                        if (result != null) {
+                          ref.redux(selectedSendingFilesProvider).dispatch(AddMessageAction(message: result.text));
+                          if (result.sendToAll) {
+                            final devices = ref.read(nearbyDevicesProvider).devices.values.toList();
+                            if (devices.isNotEmpty) {
+                              // ignore: use_build_context_synchronously
+                              await Future.wait(devices.map((d) {
+                                return ref.notifier(sendProvider).startSession(
+                                  target: d,
+                                  files: ref.read(selectedSendingFilesProvider),
+                                  background: true,
+                                );
+                              }));
+                            }
+                          }
+                        }
+                      },
+                      child: const Icon(Icons.history),
+                    ),
+                  ],
                 ),
               ),
               HorizontalClipListView(
@@ -187,6 +227,13 @@ class SendTab extends StatelessWidget {
                   child: CustomIconButton(
                     onPressed: () async => await vm.onTapFavorite(context),
                     child: const Icon(Icons.favorite),
+                  ),
+                ),
+                Tooltip(
+                  message: t.sendTab.sendToAllFavorites,
+                  child: CustomIconButton(
+                    onPressed: () async => await vm.onTapSendToAllFavorites(context),
+                    child: const Icon(Icons.star_border),
                   ),
                 ),
                 _SendModeButton(

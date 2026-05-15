@@ -21,7 +21,7 @@ final httpProvider = ViewProvider((ref) {
   final securityContext = ref.watch(securityProvider);
   final discoveryTimeout = ref.watch(settingsProvider.select((state) => state.discoveryTimeout));
   return HttpClientCollection(
-    discovery: createRhttpClient(Duration(milliseconds: discoveryTimeout), securityContext),
+    discovery: createRhttpClient(Duration(milliseconds: discoveryTimeout), securityContext, requestClientCert: false),
     longLiving: createRhttpClient(
       const Duration(days: 30),
       securityContext,

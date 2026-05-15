@@ -15,6 +15,7 @@ class SyncState with SyncStateMappable {
   final Future<void> Function() init;
   final Object rootIsolateToken;
   final CustomHttpClient Function(Duration timeout, StoredSecurityContext) httpClientFactory;
+  final CustomHttpClient Function(Duration timeout, StoredSecurityContext) httpDiscoveryClientFactory;
   final StoredSecurityContext securityContext;
   final DeviceInfoResult deviceInfo;
   final String alias;
@@ -32,6 +33,7 @@ class SyncState with SyncStateMappable {
     required this.init,
     required this.rootIsolateToken,
     required this.httpClientFactory,
+    required this.httpDiscoveryClientFactory,
     required this.securityContext,
     required this.deviceInfo,
     required this.alias,

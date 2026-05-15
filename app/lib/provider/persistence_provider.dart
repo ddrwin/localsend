@@ -11,6 +11,7 @@ import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/persistence/color_mode.dart';
 import 'package:localsend_app/model/persistence/favorite_device.dart';
 import 'package:localsend_app/model/persistence/receive_history_entry.dart';
+import 'package:localsend_app/model/persistence/send_history_entry.dart';
 import 'package:localsend_app/model/send_mode.dart';
 import 'package:localsend_app/provider/window_dimensions_provider.dart';
 import 'package:localsend_app/util/alias_generator.dart';
@@ -49,6 +50,9 @@ const _securityContext = 'ls_security_context';
 // Received file history
 const _receiveHistory = 'ls_receive_history';
 
+// Sent file history
+const _sendHistory = 'ls_send_history';
+
 // Favorites
 const _favorites = 'ls_favorites';
 
@@ -86,6 +90,7 @@ const _deviceType = 'ls_device_type';
 const _deviceModel = 'ls_device_model';
 const _shareViaLinkAutoAccept = 'ls_share_via_link_auto_accept';
 const _advancedSettingsKey = 'ls_advanced_settings';
+const _messageInputConfig = 'ls_message_input_config';
 
 final persistenceProvider = Provider<PersistenceService>((ref) {
   throw Exception('persistenceProvider not initialized');
@@ -217,6 +222,20 @@ class PersistenceService {
   Future<void> setReceiveHistory(List<ReceiveHistoryEntry> entries) async {
     final historyRaw = entries.map((entry) => jsonEncode(entry.toJson())).toList();
     await _prefs.setStringList(_receiveHistory, historyRaw);
+  }
+
+  List<SendHistoryEntry> getSendHistory() {
+    try {
+      final historyRaw = _prefs.getStringList(_sendHistory) ?? [];
+      return historyRaw.map((entry) => SendHistoryEntry.fromJson(jsonDecode(entry))).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> setSendHistory(List<SendHistoryEntry> entries) async {
+    final historyRaw = entries.map((entry) => jsonEncode(entry.toJson())).toList();
+    await _prefs.setStringList(_sendHistory, historyRaw);
   }
 
   List<FavoriteDevice> getFavorites() {
@@ -371,6 +390,14 @@ class PersistenceService {
 
   Future<void> setAdvancedSettingsEnabled(bool isEnabled) async {
     await _prefs.setBool(_advancedSettingsKey, isEnabled);
+  }
+
+  String getMessageInputConfig() {
+    return _prefs.getString(_messageInputConfig) ?? '{}';
+  }
+
+  Future<void> setMessageInputConfig(String config) async {
+    await _prefs.setString(_messageInputConfig, config);
   }
 
   bool isQuickSave() {

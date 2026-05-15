@@ -108,9 +108,9 @@ class SelectedFilesPage extends StatelessWidget {
                                   ),
                                   onPressed: () async {
                                     final result =
-                                        await showDialog<String>(context: context, builder: (_) => MessageInputDialog(initialText: message));
+                                        await showDialog<MessageInputResult>(context: context, builder: (_) => MessageInputDialog(initialText: message, ref: ref));
                                     if (result != null) {
-                                      ref.redux(selectedSendingFilesProvider).dispatch(UpdateMessageAction(message: result, index: index));
+                                      ref.redux(selectedSendingFilesProvider).dispatch(UpdateMessageAction(message: result.text, index: index));
                                     }
                                   },
                                   child: const Icon(Icons.edit),

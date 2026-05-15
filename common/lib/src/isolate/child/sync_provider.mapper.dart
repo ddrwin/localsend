@@ -30,6 +30,9 @@ class SyncStateMapper extends ClassMapperBase<SyncState> {
   static Function _$httpClientFactory(SyncState v) => (v as dynamic).httpClientFactory as Function;
   static dynamic _arg$httpClientFactory(f) => f<CustomHttpClient Function(Duration, StoredSecurityContext)>();
   static const Field<SyncState, Function> _f$httpClientFactory = Field('httpClientFactory', _$httpClientFactory, arg: _arg$httpClientFactory);
+  static Function _$httpDiscoveryClientFactory(SyncState v) => (v as dynamic).httpDiscoveryClientFactory as Function;
+  static dynamic _arg$httpDiscoveryClientFactory(f) => f<CustomHttpClient Function(Duration, StoredSecurityContext)>();
+  static const Field<SyncState, Function> _f$httpDiscoveryClientFactory = Field('httpDiscoveryClientFactory', _$httpDiscoveryClientFactory, arg: _arg$httpDiscoveryClientFactory);
   static StoredSecurityContext _$securityContext(SyncState v) => v.securityContext;
   static const Field<SyncState, StoredSecurityContext> _f$securityContext = Field('securityContext', _$securityContext);
   static DeviceInfoResult _$deviceInfo(SyncState v) => v.deviceInfo;
@@ -58,6 +61,7 @@ class SyncStateMapper extends ClassMapperBase<SyncState> {
     #init: _f$init,
     #rootIsolateToken: _f$rootIsolateToken,
     #httpClientFactory: _f$httpClientFactory,
+    #httpDiscoveryClientFactory: _f$httpDiscoveryClientFactory,
     #securityContext: _f$securityContext,
     #deviceInfo: _f$deviceInfo,
     #alias: _f$alias,
@@ -76,6 +80,7 @@ class SyncStateMapper extends ClassMapperBase<SyncState> {
         init: data.dec(_f$init),
         rootIsolateToken: data.dec(_f$rootIsolateToken),
         httpClientFactory: data.dec(_f$httpClientFactory),
+        httpDiscoveryClientFactory: data.dec(_f$httpDiscoveryClientFactory),
         securityContext: data.dec(_f$securityContext),
         deviceInfo: data.dec(_f$deviceInfo),
         alias: data.dec(_f$alias),
@@ -139,6 +144,7 @@ abstract class SyncStateCopyWith<$R, $In extends SyncState, $Out> implements Cla
       {Future<void> Function()? init,
       Object? rootIsolateToken,
       CustomHttpClient Function(Duration, StoredSecurityContext)? httpClientFactory,
+      CustomHttpClient Function(Duration, StoredSecurityContext)? httpDiscoveryClientFactory,
       StoredSecurityContext? securityContext,
       DeviceInfoResult? deviceInfo,
       String? alias,
@@ -174,6 +180,7 @@ class _SyncStateCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, SyncState, 
           {Future<void> Function()? init,
           Object? rootIsolateToken,
           CustomHttpClient Function(Duration, StoredSecurityContext)? httpClientFactory,
+          CustomHttpClient Function(Duration, StoredSecurityContext)? httpDiscoveryClientFactory,
           StoredSecurityContext? securityContext,
           DeviceInfoResult? deviceInfo,
           String? alias,
@@ -189,6 +196,7 @@ class _SyncStateCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, SyncState, 
         if (init != null) #init: init,
         if (rootIsolateToken != null) #rootIsolateToken: rootIsolateToken,
         if (httpClientFactory != null) #httpClientFactory: httpClientFactory,
+        if (httpDiscoveryClientFactory != null) #httpDiscoveryClientFactory: httpDiscoveryClientFactory,
         if (securityContext != null) #securityContext: securityContext,
         if (deviceInfo != null) #deviceInfo: deviceInfo,
         if (alias != null) #alias: alias,
@@ -206,6 +214,7 @@ class _SyncStateCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, SyncState, 
       init: data.get(#init, or: $value.init),
       rootIsolateToken: data.get(#rootIsolateToken, or: $value.rootIsolateToken),
       httpClientFactory: data.get(#httpClientFactory, or: $value.httpClientFactory),
+      httpDiscoveryClientFactory: data.get(#httpDiscoveryClientFactory, or: $value.httpDiscoveryClientFactory),
       securityContext: data.get(#securityContext, or: $value.securityContext),
       deviceInfo: data.get(#deviceInfo, or: $value.deviceInfo),
       alias: data.get(#alias, or: $value.alias),
