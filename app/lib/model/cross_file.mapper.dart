@@ -43,6 +43,9 @@ class CrossFileMapper extends ClassMapperBase<CrossFile> {
   static DateTime? _$lastAccessed(CrossFile v) => v.lastAccessed;
   static const Field<CrossFile, DateTime> _f$lastAccessed =
       Field('lastAccessed', _$lastAccessed);
+  static bool? _$autoPaste(CrossFile v) => v.autoPaste;
+  static const Field<CrossFile, bool?> _f$autoPaste =
+      Field('autoPaste', _$autoPaste);
 
   @override
   final MappableFields<CrossFile> fields = const {
@@ -55,6 +58,7 @@ class CrossFileMapper extends ClassMapperBase<CrossFile> {
     #bytes: _f$bytes,
     #lastModified: _f$lastModified,
     #lastAccessed: _f$lastAccessed,
+    #autoPaste: _f$autoPaste,
   };
 
   static CrossFile _instantiate(DecodingData data) {
@@ -67,7 +71,8 @@ class CrossFileMapper extends ClassMapperBase<CrossFile> {
         path: data.dec(_f$path),
         bytes: data.dec(_f$bytes),
         lastModified: data.dec(_f$lastModified),
-        lastAccessed: data.dec(_f$lastAccessed));
+        lastAccessed: data.dec(_f$lastAccessed),
+        autoPaste: data.dec(_f$autoPaste));
   }
 
   @override
@@ -130,7 +135,8 @@ abstract class CrossFileCopyWith<$R, $In extends CrossFile, $Out>
       String? path,
       List<int>? bytes,
       DateTime? lastModified,
-      DateTime? lastAccessed});
+      DateTime? lastAccessed,
+      bool? autoPaste});
   CrossFileCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -158,7 +164,8 @@ class _CrossFileCopyWithImpl<$R, $Out>
           Object? path = $none,
           Object? bytes = $none,
           Object? lastModified = $none,
-          Object? lastAccessed = $none}) =>
+          Object? lastAccessed = $none,
+          Object? autoPaste = $none}) =>
       $apply(FieldCopyWithData({
         if (name != null) #name: name,
         if (fileType != null) #fileType: fileType,
@@ -168,7 +175,8 @@ class _CrossFileCopyWithImpl<$R, $Out>
         if (path != $none) #path: path,
         if (bytes != $none) #bytes: bytes,
         if (lastModified != $none) #lastModified: lastModified,
-        if (lastAccessed != $none) #lastAccessed: lastAccessed
+        if (lastAccessed != $none) #lastAccessed: lastAccessed,
+        if (autoPaste != $none) #autoPaste: autoPaste
       }));
   @override
   CrossFile $make(CopyWithData data) => CrossFile(
@@ -180,7 +188,8 @@ class _CrossFileCopyWithImpl<$R, $Out>
       path: data.get(#path, or: $value.path),
       bytes: data.get(#bytes, or: $value.bytes),
       lastModified: data.get(#lastModified, or: $value.lastModified),
-      lastAccessed: data.get(#lastAccessed, or: $value.lastAccessed));
+      lastAccessed: data.get(#lastAccessed, or: $value.lastAccessed),
+      autoPaste: data.get(#autoPaste, or: $value.autoPaste));
 
   @override
   CrossFileCopyWith<$R2, CrossFile, $Out2> $chain<$R2, $Out2>(

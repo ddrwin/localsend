@@ -24,17 +24,20 @@ class FileMetadataMapper extends ClassMapperBase<FileMetadata> {
   static const Field<FileMetadata, DateTime> _f$lastModified = Field('lastModified', _$lastModified, key: 'modified');
   static DateTime? _$lastAccessed(FileMetadata v) => v.lastAccessed;
   static const Field<FileMetadata, DateTime> _f$lastAccessed = Field('lastAccessed', _$lastAccessed, key: 'accessed');
+  static bool? _$autoPaste(FileMetadata v) => v.autoPaste;
+  static const Field<FileMetadata, bool?> _f$autoPaste = Field('autoPaste', _$autoPaste, key: 'autoPaste');
 
   @override
   final MappableFields<FileMetadata> fields = const {
     #lastModified: _f$lastModified,
     #lastAccessed: _f$lastAccessed,
+    #autoPaste: _f$autoPaste,
   };
   @override
   final bool ignoreNull = true;
 
   static FileMetadata _instantiate(DecodingData data) {
-    return FileMetadata(lastModified: data.dec(_f$lastModified), lastAccessed: data.dec(_f$lastAccessed));
+    return FileMetadata(lastModified: data.dec(_f$lastModified), lastAccessed: data.dec(_f$lastAccessed), autoPaste: data.dec(_f$autoPaste));
   }
 
   @override
@@ -81,7 +84,7 @@ extension FileMetadataValueCopy<$R, $Out> on ObjectCopyWith<$R, FileMetadata, $O
 }
 
 abstract class FileMetadataCopyWith<$R, $In extends FileMetadata, $Out> implements ClassCopyWith<$R, $In, $Out> {
-  $R call({DateTime? lastModified, DateTime? lastAccessed});
+  $R call({DateTime? lastModified, DateTime? lastAccessed, bool? autoPaste});
   FileMetadataCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -91,11 +94,11 @@ class _FileMetadataCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, FileMeta
   @override
   late final ClassMapperBase<FileMetadata> $mapper = FileMetadataMapper.ensureInitialized();
   @override
-  $R call({Object? lastModified = $none, Object? lastAccessed = $none}) =>
-      $apply(FieldCopyWithData({if (lastModified != $none) #lastModified: lastModified, if (lastAccessed != $none) #lastAccessed: lastAccessed}));
+  $R call({Object? lastModified = $none, Object? lastAccessed = $none, Object? autoPaste = $none}) =>
+      $apply(FieldCopyWithData({if (lastModified != $none) #lastModified: lastModified, if (lastAccessed != $none) #lastAccessed: lastAccessed, if (autoPaste != $none) #autoPaste: autoPaste}));
   @override
   FileMetadata $make(CopyWithData data) =>
-      FileMetadata(lastModified: data.get(#lastModified, or: $value.lastModified), lastAccessed: data.get(#lastAccessed, or: $value.lastAccessed));
+      FileMetadata(lastModified: data.get(#lastModified, or: $value.lastModified), lastAccessed: data.get(#lastAccessed, or: $value.lastAccessed), autoPaste: data.get(#autoPaste, or: $value.autoPaste));
 
   @override
   FileMetadataCopyWith<$R2, FileMetadata, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) => _FileMetadataCopyWithImpl($value, $cast, t);

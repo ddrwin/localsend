@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -45,16 +46,25 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
   bool _locked = false;
   bool _isSending = false;
   bool _autoSendOnPaste = false;
+  Timer? _draftTimer;
+  String _lastSavedDraft = '';
 
   @override
   void initState() {
     super.initState();
     _textController.text = widget.initialText ?? '';
     _restoreConfig();
+    // Restore draft if no initial text was provided
+    if (widget.initialText == null) {
+      _restoreDraft();
+    }
+    // Start draft auto-save timer (every 1 second)
+    _draftTimer = Timer.periodic(const Duration(seconds: 1), (_) => _saveDraft());
   }
 
   @override
   void dispose() {
+    _draftTimer?.cancel();
     _textController.dispose();
     super.dispose();
   }
@@ -75,6 +85,60 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
     widget.ref.read(persistenceProvider).setMessageInputConfig(json);
   }
 
+  /// Restore the last draft from send history (the most recent draft entry).
+  void _restoreDraft() {
+    try {
+      final persistence = widget.ref.read(persistenceProvider);
+      final entries = persistence.getSendHistory();
+      final lastDraft = entries.firstWhereOrNull((e) => e.isDraftValue);
+      if (lastDraft != null) {
+        _textController.text = lastDraft.fileName;
+        _textController.selection = TextSelection.fromPosition(
+          TextPosition(offset: lastDraft.fileName.length),
+        );
+        _lastSavedDraft = lastDraft.fileName;
+      }
+    } catch (_) {}
+  }
+
+  /// Auto-save draft every 1 second.
+  void _saveDraft() {
+    try {
+      final text = _textController.text.trim();
+      if (text.isEmpty || text == _lastSavedDraft || _isSending) return;
+      _lastSavedDraft = text;
+
+      final persistence = widget.ref.read(persistenceProvider);
+      final entries = persistence.getSendHistory();
+
+      // Remove old draft for this session (same text means no change)
+      final withoutOld = entries.where((e) => !e.isDraftValue || e.fileName != text).toList();
+
+      final draftEntry = SendHistoryEntry(
+        id: _uuid.v4(),
+        fileName: text,
+        fileType: FileType.text,
+        fileSize: 0,
+        targetAlias: '',
+        timestamp: DateTime.now().toUtc(),
+        isDraft: true,
+      );
+
+      unawaited(persistence.setSendHistory([draftEntry, ...withoutOld].take(30).toList()));
+    } catch (_) {}
+  }
+
+  /// Remove the draft entry after sending.
+  void _removeDraft() {
+    try {
+      final text = _textController.text.trim();
+      if (text.isEmpty) return;
+      final persistence = widget.ref.read(persistenceProvider);
+      final entries = persistence.getSendHistory();
+      unawaited(persistence.setSendHistory(entries.where((e) => !e.isDraftValue || e.fileName != text).toList()));
+    } catch (_) {}
+  }
+
   void _toggleAutoSend() {
     _autoSendOnPaste = !_autoSendOnPaste;
     widget.ref.notifier(settingsProvider).setAutoSendOnPaste(_autoSendOnPaste);
@@ -85,31 +149,70 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
     Navigator.of(context).pop(MessageInputResult(text, sendToAll));
   }
 
-  /// Record send history immediately (decoupled from send success).
-  void _recordSendHistory(String text, List<int> bytes, List<Device> targets) {
+  /// Create a single history entry with all targets (status = sending).
+  /// Returns the entry ID so it can be updated after send completes.
+  String _createHistoryEntry(String text, List<int> bytes, List<Device> targets) {
     try {
       final persistence = widget.ref.read(persistenceProvider);
+      final id = _uuid.v4();
+      final targetsData = targets.map((d) => {'alias': d.alias, 'status': 'sending'}).toList();
       final now = DateTime.now().toUtc();
-      for (final device in targets) {
-        final newEntry = SendHistoryEntry(
-          id: _uuid.v4(),
-          fileName: text,
-          fileType: FileType.text,
-          fileSize: bytes.length,
-          targetAlias: device.alias,
-          timestamp: now,
-        );
-        final current = persistence.getSendHistory();
-        persistence.setSendHistory([newEntry, ...current].take(30).toList());
+
+      final newEntry = SendHistoryEntry(
+        id: id,
+        fileName: text,
+        fileType: FileType.text,
+        fileSize: bytes.length,
+        targetAlias: targets.length == 1 ? targets.first.alias : '${targets.length} devices',
+        timestamp: now,
+        targetsJson: jsonEncode(targetsData),
+      );
+
+      final current = persistence.getSendHistory();
+      unawaited(persistence.setSendHistory([newEntry, ...current].take(30).toList()));
+      return id;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Update per-target statuses in an existing history entry.
+  void _updateTargetStatuses(String entryId, List<({Device device, bool success})> results) {
+    try {
+      if (entryId.isEmpty) return;
+      final persistence = widget.ref.read(persistenceProvider);
+      final entries = persistence.getSendHistory();
+      final index = entries.indexWhere((e) => e.id == entryId);
+      if (index < 0) return;
+
+      final entry = entries[index];
+      final existingTargets = entry.targetsJson != null
+          ? (jsonDecode(entry.targetsJson!) as List<dynamic>).cast<Map<String, dynamic>>()
+          : <Map<String, dynamic>>[];
+
+      for (final r in results) {
+        final t = existingTargets.firstWhereOrNull((t) => t['alias'] == r.device.alias);
+        if (t != null) {
+          t['status'] = r.success ? 'success' : 'failed';
+        }
       }
+
+      final updated = entry.copyWith(targetsJson: jsonEncode(existingTargets));
+      final newList = [...entries];
+      newList[index] = updated;
+      unawaited(persistence.setSendHistory(newList));
     } catch (_) {}
   }
 
   /// Send text to the given devices in the background.
-  Future<void> _sendToDevices(Iterable<Device> targets, String text, List<int> bytes) async {
-    if (_isSending) return;
-    if (targets.isEmpty) return;
+  /// Returns per-target results.
+  Future<List<({Device device, bool success})>> _sendToDevices(
+    Iterable<Device> targets, String text, List<int> bytes,
+  ) async {
+    if (_isSending) return [];
+    if (targets.isEmpty) return [];
 
+    final autoPaste = _autoSendOnPaste; // capture current state for the flag
     final file = CrossFile(
       name: '${_uuid.v4()}.txt',
       fileType: FileType.text,
@@ -120,6 +223,7 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
       bytes: bytes,
       lastModified: null,
       lastAccessed: null,
+      autoPaste: autoPaste,
     );
 
     final ref = widget.ref;
@@ -127,27 +231,36 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
 
     _isSending = true;
     try {
-      await Future.wait(devices.map((d) => ref.notifier(sendProvider).startSession(
-        target: d,
-        files: [file],
-        background: true,
-      )));
+      final results = await Future.wait(devices.map((d) async {
+        try {
+          await ref.notifier(sendProvider).startSession(
+            target: d,
+            files: [file],
+            background: true,
+            skipRecording: true, // dialog handles history
+          );
+          return (device: d, success: true);
+        } catch (_) {
+          return (device: d, success: false);
+        }
+      }));
 
       if (mounted) {
         _showTopToast(t.general.finished);
       }
+      return results;
     } finally {
       _isSending = false;
     }
   }
 
-  void _handleSend() {
+  void _handleSend() async {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
     final bytes = utf8.encode(text);
 
     switch (_sendMode) {
-      case _SendMode.favorites:
+      case _SendMode.favorites: {
         final ref = widget.ref;
         final nearbyDevices = ref.read(nearbyDevicesProvider).devices.values;
         final favorites = ref.read(favoritesProvider);
@@ -158,37 +271,40 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
         }
         if (targets.isEmpty) return;
 
-        // Record history before sending (decoupled: history saves even if send fails)
-        _recordSendHistory(text, bytes, targets);
+        // Remove draft, create single history entry, then send
+        _removeDraft();
+        final entryId = _createHistoryEntry(text, bytes, targets);
+        final results = await _sendToDevices(targets, text, bytes);
+        _updateTargetStatuses(entryId, results);
 
-        if (_locked) {
-          _sendToDevices(targets, text, bytes);
-          _textController.clear();
-        } else {
-          _sendToDevices(targets, text, bytes);
-          _textController.clear();
+        _textController.clear();
+        _lastSavedDraft = '';
+        if (!_locked) {
           _pop(text);
         }
+      }
 
-      case _SendMode.select:
+      case _SendMode.select: {
         _pop(text);
+      }
 
-      case _SendMode.all:
+      case _SendMode.all: {
         final ref = widget.ref;
         final targets = ref.read(nearbyDevicesProvider).devices.values;
         if (targets.isEmpty) return;
 
-        // Record history before sending (decoupled: history saves even if send fails)
-        _recordSendHistory(text, bytes, targets.toList());
+        // Remove draft, create single history entry, then send
+        _removeDraft();
+        final entryId = _createHistoryEntry(text, bytes, targets.toList());
+        final results = await _sendToDevices(targets, text, bytes);
+        _updateTargetStatuses(entryId, results);
 
-        if (_locked) {
-          _sendToDevices(targets, text, bytes);
-          _textController.clear();
-        } else {
-          _sendToDevices(targets, text, bytes);
-          _textController.clear();
+        _textController.clear();
+        _lastSavedDraft = '';
+        if (!_locked) {
           _pop(text, sendToAll: true);
         }
+      }
     }
   }
 

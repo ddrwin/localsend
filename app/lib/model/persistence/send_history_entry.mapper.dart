@@ -38,6 +38,12 @@ class SendHistoryEntryMapper extends ClassMapperBase<SendHistoryEntry> {
   static DateTime _$timestamp(SendHistoryEntry v) => v.timestamp;
   static const Field<SendHistoryEntry, DateTime> _f$timestamp =
       Field('timestamp', _$timestamp);
+  static bool? _$isDraft(SendHistoryEntry v) => v.isDraft;
+  static const Field<SendHistoryEntry, bool?> _f$isDraft =
+      Field('isDraft', _$isDraft);
+  static String? _$targetsJson(SendHistoryEntry v) => v.targetsJson;
+  static const Field<SendHistoryEntry, String?> _f$targetsJson =
+      Field('targetsJson', _$targetsJson);
 
   @override
   final MappableFields<SendHistoryEntry> fields = const {
@@ -47,6 +53,8 @@ class SendHistoryEntryMapper extends ClassMapperBase<SendHistoryEntry> {
     #fileSize: _f$fileSize,
     #targetAlias: _f$targetAlias,
     #timestamp: _f$timestamp,
+    #isDraft: _f$isDraft,
+    #targetsJson: _f$targetsJson,
   };
 
   static SendHistoryEntry _instantiate(DecodingData data) {
@@ -56,7 +64,9 @@ class SendHistoryEntryMapper extends ClassMapperBase<SendHistoryEntry> {
         fileType: data.dec(_f$fileType),
         fileSize: data.dec(_f$fileSize),
         targetAlias: data.dec(_f$targetAlias),
-        timestamp: data.dec(_f$timestamp));
+        timestamp: data.dec(_f$timestamp),
+        isDraft: data.dec(_f$isDraft),
+        targetsJson: data.dec(_f$targetsJson));
   }
 
   @override
@@ -113,13 +123,16 @@ extension SendHistoryEntryValueCopy<$R, $Out>
 
 abstract class SendHistoryEntryCopyWith<$R, $In extends SendHistoryEntry, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
-  $R call(
-      {String? id,
-      String? fileName,
-      FileType? fileType,
-      int? fileSize,
-      String? targetAlias,
-      DateTime? timestamp});
+  $R call({
+    String? id,
+    String? fileName,
+    FileType? fileType,
+    int? fileSize,
+    String? targetAlias,
+    DateTime? timestamp,
+    bool? isDraft,
+    String? targetsJson,
+  });
   SendHistoryEntryCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
       Then<$Out2, $R2> t);
 }
@@ -133,20 +146,25 @@ class _SendHistoryEntryCopyWithImpl<$R, $Out>
   late final ClassMapperBase<SendHistoryEntry> $mapper =
       SendHistoryEntryMapper.ensureInitialized();
   @override
-  $R call(
-          {String? id,
-          String? fileName,
-          FileType? fileType,
-          int? fileSize,
-          String? targetAlias,
-          DateTime? timestamp}) =>
+  $R call({
+    String? id,
+    String? fileName,
+    FileType? fileType,
+    int? fileSize,
+    String? targetAlias,
+    DateTime? timestamp,
+    bool? isDraft,
+    String? targetsJson,
+  }) =>
       $apply(FieldCopyWithData({
         if (id != null) #id: id,
         if (fileName != null) #fileName: fileName,
         if (fileType != null) #fileType: fileType,
         if (fileSize != null) #fileSize: fileSize,
         if (targetAlias != null) #targetAlias: targetAlias,
-        if (timestamp != null) #timestamp: timestamp
+        if (timestamp != null) #timestamp: timestamp,
+        if (isDraft != null) #isDraft: isDraft,
+        if (targetsJson != null) #targetsJson: targetsJson,
       }));
   @override
   SendHistoryEntry $make(CopyWithData data) => SendHistoryEntry(
@@ -155,7 +173,9 @@ class _SendHistoryEntryCopyWithImpl<$R, $Out>
       fileType: data.get(#fileType, or: $value.fileType),
       fileSize: data.get(#fileSize, or: $value.fileSize),
       targetAlias: data.get(#targetAlias, or: $value.targetAlias),
-      timestamp: data.get(#timestamp, or: $value.timestamp));
+      timestamp: data.get(#timestamp, or: $value.timestamp),
+      isDraft: data.get(#isDraft, or: $value.isDraft),
+      targetsJson: data.get(#targetsJson, or: $value.targetsJson));
 
   @override
   SendHistoryEntryCopyWith<$R2, SendHistoryEntry, $Out2> $chain<$R2, $Out2>(

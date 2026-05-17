@@ -301,10 +301,13 @@ class ReceiveController {
         // Auto-copy text to clipboard if enabled
         if (settings.autoCopyText) {
           _debugFileLog('Auto-copy triggered: copying to clipboard, sending empty selection to stream');
-          _logger.info('autoSendOnPaste=' + (settings.autoSendOnPaste.toString()));
+          // Check autoPaste flag from sender (phone controls PC)
+          final autoPasteFlag = dto.files.values.first.metadata?.autoPaste;
+          final effectiveAutoPaste = autoPasteFlag ?? settings.autoSendOnPaste;
+          _logger.info('autoSendOnPaste=' + (settings.autoSendOnPaste.toString()) + ' senderFlag=' + (autoPasteFlag?.toString() ?? 'null') + ' effective=' + (effectiveAutoPaste.toString()));
           Clipboard.setData(ClipboardData(text: message));
           await simulatePaste();
-          if (settings.autoSendOnPaste) {
+          if (effectiveAutoPaste) {
             _debugFileLog('prepareUploadHandler: waiting 300ms before simulateEnter');
             await Future.delayed(const Duration(milliseconds: 300));
             _debugFileLog('prepareUploadHandler: calling simulateEnter');

@@ -13,6 +13,8 @@ class SendHistoryEntry with SendHistoryEntryMappable {
   final int fileSize;
   final String targetAlias;
   final DateTime timestamp;
+  final bool? isDraft; // null = false (backward compat)
+  final String? targetsJson; // JSON: [{"alias":"张三","status":"success|failed|sending"},...]
 
   const SendHistoryEntry({
     required this.id,
@@ -21,7 +23,11 @@ class SendHistoryEntry with SendHistoryEntryMappable {
     required this.fileSize,
     required this.targetAlias,
     required this.timestamp,
+    this.isDraft,
+    this.targetsJson,
   });
+
+  bool get isDraftValue => isDraft ?? false;
 
   String get timestampString {
     final localTimestamp = timestamp.toLocal();

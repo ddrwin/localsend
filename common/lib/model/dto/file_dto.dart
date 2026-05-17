@@ -13,9 +13,13 @@ class FileMetadata with FileMetadataMappable {
   @MappableField(key: 'accessed')
   final DateTime? lastAccessed;
 
+  @MappableField(key: 'autoPaste')
+  final bool? autoPaste; // null = not specified (backward compat)
+
   const FileMetadata({
     required this.lastModified,
     required this.lastAccessed,
+    this.autoPaste,
   });
 }
 

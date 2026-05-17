@@ -49,6 +49,8 @@ final sendProvider = NotifierProvider<SendNotifier, Map<String, SendSessionState
 });
 
 class SendNotifier extends Notifier<Map<String, SendSessionState>> {
+  final Set<String> _skipRecordingSessions = {};
+
   SendNotifier();
 
   @override
@@ -64,12 +66,17 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
   /// Starts a session.
   /// If [background] is true, then the session closes itself on success and no pages will be open
   /// If [background] is false, then this method will open pages by itself and waits for user input to close the session.
+  /// If [skipRecording] is true, the session will not record send history (caller handles it).
   Future<void> startSession({
     required Device target,
     required List<CrossFile> files,
     required bool background,
+    bool skipRecording = false,
   }) async {
     final sessionId = _uuid.v4();
+    if (skipRecording) {
+      _skipRecordingSessions.add(sessionId);
+    }
 
     final client = ref.read(httpProvider).longLiving;
     final cancelToken = CancelToken();
@@ -94,10 +101,11 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
               preview: files.length == 1 && files.first.fileType == FileType.text && files.first.bytes != null
                   ? utf8.decode(files.first.bytes!) // send simple message by embedding it into the preview
                   : null,
-              metadata: file.lastModified != null || file.lastAccessed != null
+              metadata: file.lastModified != null || file.lastAccessed != null || file.autoPaste != null
                   ? FileMetadata(
                       lastModified: file.lastModified,
                       lastAccessed: file.lastAccessed,
+                      autoPaste: file.autoPaste,
                     )
                   : null,
               legacy: target.version == '1.0',
@@ -366,15 +374,18 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
       _logger.info('Transfer was canceled.');
     } else {
       final hasError = sessionState.files.values.any((file) => file.status == FileStatus.failed);
+      final skipRecording = _skipRecordingSessions.contains(sessionId);
       if (!hasError && sessionState.background == true) {
-        // record history
-        await _recordSendHistory(sessionState);
+        // record history (unless caller handles it)
+        if (!skipRecording) {
+          await _recordSendHistory(sessionState);
+        }
         // close session because everything is fine and it is in background
         closeSession(sessionId);
         _logger.info('Transfer finished and session removed.');
       } else {
-        // record history for non-background success
-        if (!hasError) {
+        // record history for non-background success (unless caller handles it)
+        if (!hasError && !skipRecording) {
           await _recordSendHistory(sessionState);
         }
         // keep session alive when there are errors or currently in foreground
@@ -566,6 +577,7 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
       return;
     }
     state = state.removeSession(ref, sessionId);
+    _skipRecordingSessions.remove(sessionId);
     if (sessionState.status == SessionStatus.finished && ref.read(settingsProvider).sendMode == SendMode.single) {
       // clear selected files
       ref.redux(selectedSendingFilesProvider).dispatch(ClearSelectionAction());

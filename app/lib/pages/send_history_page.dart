@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:common/model/file_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +57,43 @@ class _SendHistoryPageState extends State<SendHistoryPage> {
     });
   }
 
+  /// Build status emoji for a single target.
+  String _targetStatusEmoji(String status) {
+    return switch (status) {
+      'success' => '✅',
+      'failed' => '❌',
+      'sending' => '⏳',
+      _ => '❓',
+    };
+  }
+
+  /// Build status summary text for the entry subtitle.
+  String _buildStatusSummary(SendHistoryEntry entry) {
+    if (entry.isDraftValue) {
+      return '- 草稿';
+    }
+    if (entry.targetsJson == null) {
+      return entry.targetAlias;
+    }
+    try {
+      final targets = jsonDecode(entry.targetsJson!) as List<dynamic>;
+      if (targets.length == 1) {
+        final t = targets[0] as Map<String, dynamic>;
+        return '${t['alias']} ${_targetStatusEmoji(t['status'] as String)}';
+      }
+      final success = targets.where((t) => (t as Map)['status'] == 'success').length;
+      final failed = targets.where((t) => (t as Map)['status'] == 'failed').length;
+      final sending = targets.where((t) => (t as Map)['status'] == 'sending').length;
+      final parts = <String>[];
+      if (success > 0) parts.add('$success✅');
+      if (failed > 0) parts.add('$failed❌');
+      if (sending > 0) parts.add('$sending⏳');
+      return parts.join(' ');
+    } catch (_) {
+      return entry.targetAlias;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final entries = _entries;
@@ -109,6 +148,7 @@ class _SendHistoryPageState extends State<SendHistoryPage> {
           else
             ...entries.map((entry) {
               final isText = entry.fileType == FileType.text;
+              final displayName = entry.isDraftValue ? '- 草稿 ${entry.fileName}' : entry.fileName;
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                 child: InkWell(
@@ -140,14 +180,18 @@ class _SendHistoryPageState extends State<SendHistoryPage> {
                           children: [
                             const SizedBox(height: 3),
                             Text(
-                              entry.fileName,
-                              style: const TextStyle(fontSize: 16),
+                              displayName,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontStyle: entry.isDraftValue ? FontStyle.italic : null,
+                                color: entry.isDraftValue ? Colors.grey : null,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.fade,
                               softWrap: false,
                             ),
                             Text(
-                              '${entry.timestampString} - ${entry.fileSize.asReadableFileSize} - ${entry.targetAlias}',
+                              '${entry.timestampString} - ${_buildStatusSummary(entry)}',
                               maxLines: 1,
                               overflow: TextOverflow.fade,
                               softWrap: false,

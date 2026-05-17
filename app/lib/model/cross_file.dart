@@ -19,6 +19,7 @@ class CrossFile with CrossFileMappable {
   final List<int>? bytes; // if type message, then UTF-8 encoded
   final DateTime? lastModified;
   final DateTime? lastAccessed;
+  final bool? autoPaste; // null = not specified
 
   const CrossFile({
     required this.name,
@@ -30,6 +31,7 @@ class CrossFile with CrossFileMappable {
     required this.bytes,
     required this.lastModified,
     required this.lastAccessed,
+    this.autoPaste,
   });
 
   /// Custom toString() to avoid printing the bytes.
