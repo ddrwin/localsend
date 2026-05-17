@@ -120,6 +120,7 @@
       "requirePin": "@:webSharePage.requirePin",
       "autoFinish": "Auto Finish",
       "autoCopyText": "Auto Copy Text",
+      "autoSendOnPaste": "Auto Send on Paste",
       "destination": "Save to folder",
       "downloads": "(Downloads)",
       "saveToGallery": "Save media to gallery",

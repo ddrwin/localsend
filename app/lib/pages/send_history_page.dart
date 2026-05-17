@@ -29,7 +29,7 @@ enum _EntryOption {
   }
 }
 
-final _optionsText = [_EntryOption.copy, _EntryOption.resend, _EntryOption.view, _EntryOption.delete];
+final _optionsText = [_EntryOption.resend, _EntryOption.view, _EntryOption.copy, _EntryOption.delete];
 final _optionsFile = [_EntryOption.info, _EntryOption.delete];
 
 class SendHistoryPage extends StatefulWidget {

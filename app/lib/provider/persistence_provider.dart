@@ -80,6 +80,7 @@ const _saveToHistory = 'ls_save_to_history';
 const _quickSave = 'ls_quick_save';
 const _quickSaveFromFavorites = 'ls_quick_save_from_favorites';
 const _autoCopyText = 'ls_auto_copy_text';
+const _autoSendOnPaste = 'ls_auto_send_on_paste';
 const _receivePin = 'ls_receive_pin';
 const _autoFinish = 'ls_auto_finish';
 const _minimizeToTray = 'ls_minimize_to_tray';
@@ -422,6 +423,14 @@ class PersistenceService {
 
   Future<void> setAutoCopyText(bool autoCopyText) async {
     await _prefs.setBool(_autoCopyText, autoCopyText);
+  }
+
+  bool isAutoSendOnPaste() {
+    return _prefs.getBool(_autoSendOnPaste) ?? false;
+  }
+
+  Future<void> setAutoSendOnPaste(bool autoSendOnPaste) async {
+    await _prefs.setBool(_autoSendOnPaste, autoSendOnPaste);
   }
 
   String? getReceivePin() {

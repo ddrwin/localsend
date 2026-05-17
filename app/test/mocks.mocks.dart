@@ -453,6 +453,38 @@ class MockPersistenceService extends _i1.Mock
       ) as _i4.Future<void>);
 
   @override
+  String getMessageInputConfig() => (super.noSuchMethod(
+        Invocation.method(
+          #getMessageInputConfig,
+          [],
+        ),
+        returnValue: _i8.dummyValue<String>(
+          this,
+          Invocation.method(
+            #getMessageInputConfig,
+            [],
+          ),
+        ),
+        returnValueForMissingStub: _i8.dummyValue<String>(
+          this,
+          Invocation.method(
+            #getMessageInputConfig,
+            [],
+          ),
+        ),
+      ) as String);
+
+  @override
+  _i4.Future<void> setMessageInputConfig(String? config) => (super.noSuchMethod(
+        Invocation.method(
+          #setMessageInputConfig,
+          [config],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
   bool isQuickSave() => (super.noSuchMethod(
         Invocation.method(
           #isQuickSave,
@@ -508,6 +540,27 @@ class MockPersistenceService extends _i1.Mock
         Invocation.method(
           #setAutoCopyText,
           [autoCopyText],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  bool isAutoSendOnPaste() => (super.noSuchMethod(
+        Invocation.method(
+          #isAutoSendOnPaste,
+          [],
+        ),
+        returnValue: false,
+        returnValueForMissingStub: false,
+      ) as bool);
+
+  @override
+  _i4.Future<void> setAutoSendOnPaste(bool? autoSendOnPaste) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setAutoSendOnPaste,
+          [autoSendOnPaste],
         ),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),

@@ -24,6 +24,7 @@ class SettingsState with SettingsStateMappable {
   final bool quickSave; // automatically accept file requests
   final bool quickSaveFromFavorites; // automatically accept file requests from favorites
   final bool autoCopyText; // automatically copy text messages to clipboard
+  final bool autoSendOnPaste; // after auto-copy, simulate Enter key to send
   final String? receivePin; // null = disabled
   final bool autoFinish; // automatically finish sessions
   final bool minimizeToTray; // minimize to tray instead of exiting the app
@@ -53,6 +54,7 @@ class SettingsState with SettingsStateMappable {
     required this.quickSave,
     required this.quickSaveFromFavorites,
     required this.autoCopyText,
+    required this.autoSendOnPaste,
     required this.receivePin,
     required this.autoFinish,
     required this.minimizeToTray,

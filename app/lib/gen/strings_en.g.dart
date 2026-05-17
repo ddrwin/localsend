@@ -659,6 +659,7 @@ class TranslationsSettingsTabReceiveEn {
   String get requirePin => _root.webSharePage.requirePin;
   String get autoFinish => 'Auto Finish';
   String get autoCopyText => 'Auto Copy Text';
+  String get autoSendOnPaste => 'Auto Send on Paste';
   String get destination => 'Save to folder';
   String get downloads => '(Downloads)';
   String get saveToGallery => 'Save media to gallery';

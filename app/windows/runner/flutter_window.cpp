@@ -51,6 +51,16 @@ bool FlutterWindow::OnCreate() {
           inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
           ::SendInput(4, inputs, sizeof(INPUT));
           result->Success(flutter::EncodableValue(true));
+        } else if (call.method_name() == "simulateEnter") {
+          // Enter key via SendInput
+          INPUT inputs[2] = {};
+          inputs[0].type = INPUT_KEYBOARD;
+          inputs[0].ki.wVk = VK_RETURN;
+          inputs[1].type = INPUT_KEYBOARD;
+          inputs[1].ki.wVk = VK_RETURN;
+          inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+          ::SendInput(2, inputs, sizeof(INPUT));
+          result->Success(flutter::EncodableValue(true));
         } else {
           result->NotImplemented();
         }

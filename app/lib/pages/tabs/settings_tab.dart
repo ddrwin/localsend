@@ -239,6 +239,14 @@ class SettingsTab extends StatelessWidget {
                     await ref.notifier(settingsProvider).setAutoCopyText(b);
                   },
                 ),
+                if (checkPlatform([TargetPlatform.windows]))
+                  _BooleanEntry(
+                    label: t.settingsTab.receive.autoSendOnPaste,
+                    value: vm.settings.autoSendOnPaste,
+                    onChanged: (b) async {
+                      await ref.notifier(settingsProvider).setAutoSendOnPaste(b);
+                    },
+                  ),
                 _BooleanEntry(
                   label: t.settingsTab.receive.autoFinish,
                   value: vm.settings.autoFinish,

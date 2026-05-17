@@ -976,6 +976,10 @@ class _TranslationsSettingsTabReceiveZhCn extends TranslationsSettingsTabReceive
   @override
   String get autoFinish => '自动完成';
   @override
+  String get autoCopyText => '自动复制文本';
+  @override
+  String get autoSendOnPaste => '粘贴后自动发送';
+  @override
   String get destination => '保存目录';
   @override
   String get downloads => '(下载)';

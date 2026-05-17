@@ -119,6 +119,8 @@
       "quickSaveFromFavorites": "@:general.quickSaveFromFavorites",
       "requirePin": "@:webSharePage.requirePin",
       "autoFinish": "自动完成",
+      "autoCopyText": "自动复制文本",
+      "autoSendOnPaste": "粘贴后自动发送",
       "destination": "保存目录",
       "downloads": "(下载)",
       "saveToGallery": "保存到相册",

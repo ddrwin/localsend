@@ -62,6 +62,7 @@ class SettingsService extends PureNotifier<SettingsState> {
         quickSave: rawQuickSave,
         quickSaveFromFavorites: rawQuickSaveFromFavorites && !rawQuickSave,
         autoCopyText: _persistence.isAutoCopyText(),
+        autoSendOnPaste: _persistence.isAutoSendOnPaste(),
         receivePin: _persistence.getReceivePin(),
         autoFinish: _persistence.isAutoFinish(),
         minimizeToTray: _persistence.isMinimizeToTray(),
@@ -186,6 +187,13 @@ class SettingsService extends PureNotifier<SettingsState> {
     await _persistence.setAutoCopyText(autoCopyText);
     state = state.copyWith(
       autoCopyText: autoCopyText,
+    );
+  }
+
+  Future<void> setAutoSendOnPaste(bool autoSendOnPaste) async {
+    await _persistence.setAutoSendOnPaste(autoSendOnPaste);
+    state = state.copyWith(
+      autoSendOnPaste: autoSendOnPaste,
     );
   }
 

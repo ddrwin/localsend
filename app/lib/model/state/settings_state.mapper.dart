@@ -67,6 +67,9 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
   static bool _$autoCopyText(SettingsState v) => v.autoCopyText;
   static const Field<SettingsState, bool> _f$autoCopyText =
       Field('autoCopyText', _$autoCopyText);
+  static bool _$autoSendOnPaste(SettingsState v) => v.autoSendOnPaste;
+  static const Field<SettingsState, bool> _f$autoSendOnPaste =
+      Field('autoSendOnPaste', _$autoSendOnPaste);
   static String? _$receivePin(SettingsState v) => v.receivePin;
   static const Field<SettingsState, String> _f$receivePin =
       Field('receivePin', _$receivePin);
@@ -121,6 +124,7 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
     #quickSave: _f$quickSave,
     #quickSaveFromFavorites: _f$quickSaveFromFavorites,
     #autoCopyText: _f$autoCopyText,
+    #autoSendOnPaste: _f$autoSendOnPaste,
     #receivePin: _f$receivePin,
     #autoFinish: _f$autoFinish,
     #minimizeToTray: _f$minimizeToTray,
@@ -152,6 +156,7 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
         quickSave: data.dec(_f$quickSave),
         quickSaveFromFavorites: data.dec(_f$quickSaveFromFavorites),
         autoCopyText: data.dec(_f$autoCopyText),
+        autoSendOnPaste: data.dec(_f$autoSendOnPaste),
         receivePin: data.dec(_f$receivePin),
         autoFinish: data.dec(_f$autoFinish),
         minimizeToTray: data.dec(_f$minimizeToTray),
@@ -239,6 +244,7 @@ abstract class SettingsStateCopyWith<$R, $In extends SettingsState, $Out>
       bool? quickSave,
       bool? quickSaveFromFavorites,
       bool? autoCopyText,
+      bool? autoSendOnPaste,
       String? receivePin,
       bool? autoFinish,
       bool? minimizeToTray,
@@ -295,6 +301,7 @@ class _SettingsStateCopyWithImpl<$R, $Out>
           bool? quickSave,
           bool? quickSaveFromFavorites,
           bool? autoCopyText,
+          bool? autoSendOnPaste,
           Object? receivePin = $none,
           bool? autoFinish,
           bool? minimizeToTray,
@@ -324,6 +331,7 @@ class _SettingsStateCopyWithImpl<$R, $Out>
         if (quickSaveFromFavorites != null)
           #quickSaveFromFavorites: quickSaveFromFavorites,
         if (autoCopyText != null) #autoCopyText: autoCopyText,
+        if (autoSendOnPaste != null) #autoSendOnPaste: autoSendOnPaste,
         if (receivePin != $none) #receivePin: receivePin,
         if (autoFinish != null) #autoFinish: autoFinish,
         if (minimizeToTray != null) #minimizeToTray: minimizeToTray,
@@ -359,6 +367,7 @@ class _SettingsStateCopyWithImpl<$R, $Out>
       quickSaveFromFavorites:
           data.get(#quickSaveFromFavorites, or: $value.quickSaveFromFavorites),
       autoCopyText: data.get(#autoCopyText, or: $value.autoCopyText),
+      autoSendOnPaste: data.get(#autoSendOnPaste, or: $value.autoSendOnPaste),
       receivePin: data.get(#receivePin, or: $value.receivePin),
       autoFinish: data.get(#autoFinish, or: $value.autoFinish),
       minimizeToTray: data.get(#minimizeToTray, or: $value.minimizeToTray),

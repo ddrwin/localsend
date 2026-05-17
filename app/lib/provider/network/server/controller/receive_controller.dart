@@ -303,6 +303,9 @@ class ReceiveController {
           _debugFileLog('Auto-copy triggered: copying to clipboard, sending empty selection to stream');
           Clipboard.setData(ClipboardData(text: message));
           simulatePaste();
+          if (settings.autoSendOnPaste) {
+            simulateEnter();
+          }
           _logger.info('Auto-copied text message to clipboard');
           streamController.add({});
         }
