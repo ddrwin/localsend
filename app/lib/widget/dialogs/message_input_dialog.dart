@@ -12,6 +12,7 @@ import 'package:localsend_app/provider/favorites_provider.dart';
 import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
 import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/persistence_provider.dart';
+import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import 'package:routerino/routerino.dart';
 import 'package:uuid/uuid.dart';
@@ -43,6 +44,7 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
   _SendMode _sendMode = _SendMode.select;
   bool _locked = false;
   bool _isSending = false;
+  bool _autoSendOnPaste = false;
 
   @override
   void initState() {
@@ -65,6 +67,7 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
       _sendMode = _SendMode.values.firstWhereOrNull((m) => m.name == map['sendMode']) ?? _SendMode.select;
       _locked = map['locked'] as bool? ?? false;
     } catch (_) {}
+    _autoSendOnPaste = widget.ref.read(persistenceProvider).isAutoSendOnPaste();
   }
 
   void _saveConfig() {
@@ -72,11 +75,37 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
     widget.ref.read(persistenceProvider).setMessageInputConfig(json);
   }
 
+  void _toggleAutoSend() {
+    _autoSendOnPaste = !_autoSendOnPaste;
+    widget.ref.notifier(settingsProvider).setAutoSendOnPaste(_autoSendOnPaste);
+    setState(() {});
+  }
+
   void _pop(String text, {bool sendToAll = false}) {
     Navigator.of(context).pop(MessageInputResult(text, sendToAll));
   }
 
-  /// Send text to the given devices, record history, and handle lock behavior.
+  /// Record send history immediately (decoupled from send success).
+  void _recordSendHistory(String text, List<int> bytes, List<Device> targets) {
+    try {
+      final persistence = widget.ref.read(persistenceProvider);
+      final now = DateTime.now().toUtc();
+      for (final device in targets) {
+        final newEntry = SendHistoryEntry(
+          id: _uuid.v4(),
+          fileName: text,
+          fileType: FileType.text,
+          fileSize: bytes.length,
+          targetAlias: device.alias,
+          timestamp: now,
+        );
+        final current = persistence.getSendHistory();
+        persistence.setSendHistory([newEntry, ...current].take(30).toList());
+      }
+    } catch (_) {}
+  }
+
+  /// Send text to the given devices in the background.
   Future<void> _sendToDevices(Iterable<Device> targets, String text, List<int> bytes) async {
     if (_isSending) return;
     if (targets.isEmpty) return;
@@ -104,24 +133,6 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
         background: true,
       )));
 
-      // Record send history
-      try {
-        final persistence = ref.read(persistenceProvider);
-        final now = DateTime.now().toUtc();
-        for (final device in devices) {
-          final newEntry = SendHistoryEntry(
-            id: _uuid.v4(),
-            fileName: text,
-            fileType: FileType.text,
-            fileSize: bytes.length,
-            targetAlias: device.alias,
-            timestamp: now,
-          );
-          final current = persistence.getSendHistory();
-          await persistence.setSendHistory([newEntry, ...current].take(30).toList());
-        }
-      } catch (_) {}
-
       if (mounted) {
         _showTopToast(t.general.finished);
       }
@@ -147,6 +158,9 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
         }
         if (targets.isEmpty) return;
 
+        // Record history before sending (decoupled: history saves even if send fails)
+        _recordSendHistory(text, bytes, targets);
+
         if (_locked) {
           _sendToDevices(targets, text, bytes);
           _textController.clear();
@@ -163,6 +177,9 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
         final ref = widget.ref;
         final targets = ref.read(nearbyDevicesProvider).devices.values;
         if (targets.isEmpty) return;
+
+        // Record history before sending (decoupled: history saves even if send fails)
+        _recordSendHistory(text, bytes, targets.toList());
 
         if (_locked) {
           _sendToDevices(targets, text, bytes);
@@ -198,10 +215,19 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
       title: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Row 1: Title + utility icons
+          // Row 1: Utility icons
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Expanded(child: Text(t.dialogs.messageInput.title, style: const TextStyle(fontSize: 14))),
+              // Auto-send toggle
+              IconButton(
+                padding: EdgeInsets.zero,
+                iconSize: 20,
+                icon: Icon(_autoSendOnPaste ? Icons.send : Icons.send_outlined),
+                color: _autoSendOnPaste ? theme.colorScheme.primary : null,
+                onPressed: _toggleAutoSend,
+                tooltip: t.settingsTab.receive.autoSendOnPaste,
+              ),
               // Lock toggle
               Opacity(
                 opacity: canLock ? 1.0 : 0.3,
@@ -246,7 +272,7 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
             ],
           ),
           const SizedBox(height: 4),
-          // Row 2: Mode selector — favorites / all only, centered
+          // Row 2: Mode selector — favorites / all, centered
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -256,6 +282,10 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
                 selected: _sendMode == _SendMode.favorites,
                 selectedColor: Colors.amber,
                 onTap: () => setState(() {
+                  if (_sendMode != _SendMode.favorites) {
+                    final favorites = widget.ref.read(favoritesProvider);
+                    if (favorites.isEmpty) return; // no favorites configured
+                  }
                   _sendMode = _sendMode == _SendMode.favorites ? _SendMode.select : _SendMode.favorites;
                   _saveConfig();
                 }),
@@ -265,7 +295,7 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
                 icon: Icons.wifi_tethering,
                 label: t.dialogs.messageInput.modeAll,
                 selected: _sendMode == _SendMode.all,
-                selectedColor: Colors.green,
+                selectedColor: const Color(0xFF4995ED),
                 onTap: () => setState(() {
                   _sendMode = _sendMode == _SendMode.all ? _SendMode.select : _SendMode.all;
                   _saveConfig();
@@ -277,6 +307,10 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
       ),
       content: TextFormField(
         controller: _textController,
+        decoration: InputDecoration(
+          hintText: t.dialogs.messageInput.title,
+          border: InputBorder.none,
+        ),
         keyboardType: TextInputType.multiline,
         minLines: 10,
         maxLines: null,
