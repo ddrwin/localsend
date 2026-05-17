@@ -102,6 +102,7 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
   }
 
   /// Auto-save draft every 1 second.
+  /// Keeps at most one draft entry — updates in place if one exists.
   void _saveDraft() {
     try {
       final text = _textController.text.trim();
@@ -110,21 +111,30 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
 
       final persistence = widget.ref.read(persistenceProvider);
       final entries = persistence.getSendHistory();
+      final existing = entries.firstWhereOrNull((e) => e.isDraftValue);
 
-      // Remove old draft for this session (same text means no change)
-      final withoutOld = entries.where((e) => !e.isDraftValue || e.fileName != text).toList();
-
-      final draftEntry = SendHistoryEntry(
-        id: _uuid.v4(),
-        fileName: text,
-        fileType: FileType.text,
-        fileSize: 0,
-        targetAlias: '',
-        timestamp: DateTime.now().toUtc(),
-        isDraft: true,
-      );
-
-      unawaited(persistence.setSendHistory([draftEntry, ...withoutOld].take(30).toList()));
+      if (existing != null) {
+        // Update existing draft in place (same ID, refreshed content + timestamp)
+        final updated = existing.copyWith(
+          fileName: text,
+          timestamp: DateTime.now().toUtc(),
+        );
+        unawaited(persistence.setSendHistory(
+          entries.map((e) => e.id == existing.id ? updated : e).toList(),
+        ));
+      } else {
+        // First draft — create new entry
+        final draft = SendHistoryEntry(
+          id: _uuid.v4(),
+          fileName: text,
+          fileType: FileType.text,
+          fileSize: 0,
+          targetAlias: '',
+          timestamp: DateTime.now().toUtc(),
+          isDraft: true,
+        );
+        unawaited(persistence.setSendHistory([draft, ...entries].take(30).toList()));
+      }
     } catch (_) {}
   }
 
@@ -285,6 +295,9 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
       }
 
       case _SendMode.select: {
+        _removeDraft();
+        _textController.clear();
+        _lastSavedDraft = '';
         _pop(text);
       }
 
