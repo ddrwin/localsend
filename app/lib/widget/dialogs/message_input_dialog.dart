@@ -114,14 +114,13 @@ class _MessageInputDialogState extends State<MessageInputDialog> {
       final existing = entries.firstWhereOrNull((e) => e.isDraftValue);
 
       if (existing != null) {
-        // Update existing draft in place (same ID, refreshed content + timestamp)
+        // Update existing draft in place and move it to the front
         final updated = existing.copyWith(
           fileName: text,
           timestamp: DateTime.now().toUtc(),
         );
-        unawaited(persistence.setSendHistory(
-          entries.map((e) => e.id == existing.id ? updated : e).toList(),
-        ));
+        final withoutDraft = entries.where((e) => e.id != existing.id).toList();
+        unawaited(persistence.setSendHistory([updated, ...withoutDraft].take(30).toList()));
       } else {
         // First draft — create new entry
         final draft = SendHistoryEntry(
